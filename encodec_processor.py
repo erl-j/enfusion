@@ -6,6 +6,14 @@ import torchaudio
 import torch
 
 
+def encodec_to_audio_scale(codes):
+    return (codes / 1024) * 2 - 1
+
+
+def audio_to_encodec_scale(audio):
+    return ((audio + 1) / 2) * 1024
+
+
 class EncodecProcessor:
     def __init__(self, sample_rate):
 

@@ -2,6 +2,8 @@
 artefacts/
 data/
 wandb/
+dd-finetune/
+audio_demo/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
