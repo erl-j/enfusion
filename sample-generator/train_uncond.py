@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
 
-import os
-import sys
-
-sys.path.append("sample-generator")
-
 from prefigure.prefigure import get_all_args, push_wandb_config
 from contextlib import contextmanager
 from copy import deepcopy
@@ -28,12 +23,6 @@ from dataset.dataset import SampleDataset
 from audio_diffusion.models import DiffusionAttnUnet1D
 from audio_diffusion.utils import ema_update
 from viz.viz import audio_spectrogram_image
-from encodec_processor import (
-    EncodecProcessor,
-    audio_to_encodec_scale,
-    encodec_to_audio_scale,
-)
-import pandas as pd
 
 
 # Define the noise schedule and sampling loop
@@ -106,27 +95,17 @@ class DiffusionUncond(pl.LightningModule):
     def __init__(self, global_args):
         super().__init__()
 
-        DEPTH = 2
-        # C_MULTS = [128, 128, 256, 256] + [512] * 10
-
-        C_MULTS = [i // 4 for i in [128, 128, 256, 256] + [512] * 10]
-
         self.diffusion = DiffusionAttnUnet1D(
-            global_args,
-            io_channels=global_args.num_channels,
-            n_attn_layers=4,
-            depth=DEPTH,
-            c_mults=C_MULTS,
+            global_args, io_channels=2, n_attn_layers=4
         )
         self.diffusion_ema = deepcopy(self.diffusion)
         self.rng = torch.quasirandom.SobolEngine(
             1, scramble=True, seed=global_args.seed
         )
         self.ema_decay = global_args.ema_decay
-        self.global_args = global_args
 
     def configure_optimizers(self):
-        return optim.Adam([*self.diffusion.parameters()], lr=self.global_args.lr)
+        return optim.Adam([*self.diffusion.parameters()], lr=4e-5)
 
     def training_step(self, batch, batch_idx):
         reals = batch[0]
@@ -170,16 +149,14 @@ class ExceptionCallback(pl.Callback):
 
 
 class DemoCallback(pl.Callback):
-    def __init__(self, global_args, encodec_processor):
+    def __init__(self, global_args):
         super().__init__()
         self.demo_every = global_args.demo_every
         self.num_demos = global_args.num_demos
         self.demo_samples = global_args.sample_size
         self.demo_steps = global_args.demo_steps
         self.sample_rate = global_args.sample_rate
-        self.num_channels = global_args.num_channels
         self.last_demo_step = -1
-        self.encodec_processor = encodec_processor
 
     @rank_zero_only
     @torch.no_grad()
@@ -193,42 +170,29 @@ class DemoCallback(pl.Callback):
 
         self.last_demo_step = trainer.global_step
 
-        noise = torch.randn([self.num_demos, self.num_channels, self.demo_samples]).to(
-            module.device
-        )
+        noise = torch.randn([self.num_demos, 2, self.demo_samples]).to(module.device)
 
-        fakes = sample(module.diffusion_ema, noise, self.demo_steps, 0)
+        try:
+            fakes = sample(module.diffusion_ema, noise, self.demo_steps, 0)
 
-        fakes = fakes.detach().cpu()
+            # Put the demos together
+            fakes = rearrange(fakes, "b d n -> d (b n)")
 
-        # decode here
-        fakes = [
-            self.encodec_processor.decode_embeddings(fakes[i][None, ...])[0]
-            for i in range(fakes.shape[0])
-        ]
+            log_dict = {}
 
-        fakes = torch.stack(fakes)
+            filename = f"demo_{trainer.global_step:08}.wav"
+            fakes = fakes.clamp(-1, 1).mul(32767).to(torch.int16).cpu()
+            torchaudio.save(filename, fakes, self.sample_rate)
 
-        fakes = fakes / torch.max(torch.abs(fakes) + 1e-8)
+            log_dict[f"demo"] = wandb.Audio(
+                filename, sample_rate=self.sample_rate, caption=f"Demo"
+            )
 
-        # Put the demos together
-        fakes = rearrange(fakes, "b d n -> d (b n)")
+            log_dict[f"demo_melspec_left"] = wandb.Image(audio_spectrogram_image(fakes))
 
-        log_dict = {}
-
-        filename = f"audio_demo/demo_{trainer.global_step:08}.wav"
-        fakes = fakes.clamp(-1, 1).mul(32767).to(torch.int16).cpu()
-        torchaudio.save(filename, fakes, self.sample_rate)
-
-        log_dict[f"demo"] = wandb.Audio(
-            filename, sample_rate=self.sample_rate, caption=f"Demo"
-        )
-
-        log_dict[f"demo_melspec_left"] = wandb.Image(audio_spectrogram_image(fakes))
-
-        trainer.logger.experiment.log(log_dict, step=trainer.global_step)
-        # except Exception as e:
-        #     print(f"{type(e).__name__}: {e}", file=sys.stderr)
+            trainer.logger.experiment.log(log_dict, step=trainer.global_step)
+        except Exception as e:
+            print(f"{type(e).__name__}: {e}", file=sys.stderr)
 
 
 def main():
@@ -243,27 +207,8 @@ def main():
     print("Using device:", device)
     torch.manual_seed(args.seed)
 
-    SAMPLE_RATE = 48000
+    train_set = SampleDataset(["../data/misc"], args)
 
-    N_CODES = 1
-
-    encodec_processor = EncodecProcessor(SAMPLE_RATE)
-
-    class DrumfusionDataset(torch.utils.data.Dataset):
-        def __init__(self):
-            self.data = torch.load("artefacts/drums_data.pt")
-
-        def __len__(self):
-            return len(self.data)
-
-        def __getitem__(self, idx):
-            fp = self.data[idx]["filepath"]
-            embedding = self.data[idx]["encoded_frames_embeddings"][0]
-            return (embedding, fp)
-
-    train_set = DrumfusionDataset()
-
-    # train_set = SampleDataset([args.training_dir], args)
     train_dl = data.DataLoader(
         train_set,
         args.batch_size,
@@ -287,7 +232,7 @@ def main():
     ckpt_callback = pl.callbacks.ModelCheckpoint(
         every_n_train_steps=args.checkpoint_every, save_top_k=-1, dirpath=save_path
     )
-    demo_callback = DemoCallback(args, encodec_processor)
+    demo_callback = DemoCallback(args)
 
     diffusion_model = DiffusionUncond(args)
 
@@ -295,7 +240,7 @@ def main():
     push_wandb_config(wandb_logger, args)
 
     diffusion_trainer = pl.Trainer(
-        devices=[1],
+        devices=[0],
         accelerator="gpu",
         # num_nodes = args.num_nodes,
         # strategy='ddp',
@@ -312,5 +257,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# %%
