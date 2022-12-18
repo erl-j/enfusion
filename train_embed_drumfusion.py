@@ -209,6 +209,8 @@ class DemoCallback(pl.Callback):
 
         fakes = torch.stack(fakes)
 
+        fakes = fakes / torch.amax(torch.abs(fakes) + 1e-8, dim=[1, 2], keepdim=True)[0]
+
         # Put the demos together
         fakes = rearrange(fakes, "b d n -> d (b n)")
 
