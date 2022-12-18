@@ -17,9 +17,8 @@ CLIP_S = 1
 
 encodec_processor = EncodecProcessor(SAMPLE_RATE)
 #%%
-frames = []
+data = []
 
-good_fps = []
 
 fps = glob.glob(AUDIO_FILEPATH_PATTERN, recursive=True)
 for fp in tqdm(fps):
@@ -30,7 +29,6 @@ for fp in tqdm(fps):
         # if there is an error, skip the file
         continue
 
-    good_fps.append(fp)
     # crop/pad to 1 second
     if wav.shape[1] > sr:
         wav = wav[:, :sr]
@@ -54,20 +52,24 @@ for fp in tqdm(fps):
     # reconstructed_wav = encodec_processor.decode(encoded_frames)
     # play_audio(reconstructed_wav, SAMPLE_RATE)
 
-    frames.append(encoded_frames)
+    embeddings = encodec_processor.encode_wo_quantization(wav, SAMPLE_RATE)
 
-torch.save(frames, "artefacts/drums_encoded_frames.pt")
+    folder = fp.split("/")[2]
+    # filenames
+    filename = fp.split("/")[3]
+
+    data.append(
+        {
+            "folder": folder,
+            "filename": filename,
+            "filepath": fp,
+            "encoded_frames_codes": encoded_frames,
+            "encoded_frames_embeddings": embeddings,
+        }
+    )
+
+torch.save(data, "artefacts/drums_data.pt")
 #%%
-
-# folders
-folders = [fp.split("/")[2] for fp in good_fps]
-# filenames
-filenames = [fp.split("/")[3] for fp in good_fps]
-
-pd = pandas.DataFrame({"folder": folders, "filename": filenames, "filepath": good_fps})
-# to csv
-pd.to_csv("artefacts/drums_metadata.csv", index=False)
-
 #%%
 
 

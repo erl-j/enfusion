@@ -37,6 +37,21 @@ class EncodecProcessor:
         reconstructed_wav = self.model.decode(encoded_frames)
         return reconstructed_wav
 
+    def encode_wo_quantization(self, wav, input_sample_rate):
+        # Load and pre-process the audio waveform
+        wav = wav.unsqueeze(0)
+        wav = convert_audio(
+            wav, input_sample_rate, self.sample_rate, self.model.channels
+        )
+        # Extract discrete codes from EnCodec
+        with torch.no_grad():
+            embeddings = self.model.encoder(wav)
+        return embeddings
+
+    def decode_embeddings(self, embeddings):
+        reconstructed_wav = self.model.decoder(embeddings)
+        return reconstructed_wav
+
     # def crop(self, encoded_frames, n):
     #     for frame_index in range(len(encoded_frames)):
     #         encoded_frames[frame_index] = list(encoded_frames[frame_index])

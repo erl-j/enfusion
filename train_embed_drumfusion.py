@@ -112,16 +112,21 @@ class DiffusionUncond(pl.LightningModule):
         C_MULTS = [i // 4 for i in [128, 128, 256, 256] + [512] * 10]
 
         self.diffusion = DiffusionAttnUnet1D(
-            global_args, io_channels=1, n_attn_layers=4, depth=DEPTH, c_mults=C_MULTS
+            global_args,
+            io_channels=global_args.num_channels,
+            n_attn_layers=4,
+            depth=DEPTH,
+            c_mults=C_MULTS,
         )
         self.diffusion_ema = deepcopy(self.diffusion)
         self.rng = torch.quasirandom.SobolEngine(
             1, scramble=True, seed=global_args.seed
         )
         self.ema_decay = global_args.ema_decay
+        self.global_args = global_args
 
     def configure_optimizers(self):
-        return optim.Adam([*self.diffusion.parameters()], lr=4e-5)
+        return optim.Adam([*self.diffusion.parameters()], lr=self.global_args.lr)
 
     def training_step(self, batch, batch_idx):
         reals = batch[0]
@@ -172,6 +177,7 @@ class DemoCallback(pl.Callback):
         self.demo_samples = global_args.sample_size
         self.demo_steps = global_args.demo_steps
         self.sample_rate = global_args.sample_rate
+        self.num_channels = global_args.num_channels
         self.last_demo_step = -1
         self.encodec_processor = encodec_processor
 
@@ -187,34 +193,21 @@ class DemoCallback(pl.Callback):
 
         self.last_demo_step = trainer.global_step
 
-        noise = torch.randn([self.num_demos, 1, self.demo_samples]).to(module.device)
-
-        print("DEMO")
+        noise = torch.randn([self.num_demos, self.num_channels, self.demo_samples]).to(
+            module.device
+        )
 
         fakes = sample(module.diffusion_ema, noise, self.demo_steps, 0)
 
-        # scale back to encodec scale
-        fakes = audio_to_encodec_scale(fakes)
+        fakes = fakes.detach().cpu()
 
-        # int
-        fakes = torch.floor(fakes).to(torch.int32).detach().cpu()
-
-        fakes = torch.clamp(fakes, 0, 1023)
-
-        print(torch.min(fakes))
-        print(torch.max(fakes))
-
-        # decompose into code sequences
+        # decode here
         fakes = [
-            self.encodec_processor.decode(
-                [(fakes[i][None, ...], torch.tensor([[0.5]]))]
-            )
+            self.encodec_processor.decode_embeddings(fakes[i][None, ...])[0]
             for i in range(fakes.shape[0])
         ]
 
         fakes = torch.stack(fakes)
-
-        fakes = fakes[:, 0, :, :]
 
         # Put the demos together
         fakes = rearrange(fakes, "b d n -> d (b n)")
@@ -256,23 +249,15 @@ def main():
 
     class DrumfusionDataset(torch.utils.data.Dataset):
         def __init__(self):
-            frames = torch.load("artefacts/drums_encoded_frames.pt")
-
-            self.df = pd.read_csv("artefacts/drums_metadata.csv")
-            #%%
-            quantized_frames = [
-                encodec_processor.quantize(frames[i], N_CODES)
-                for i in range(len(frames))
-            ]
-            self.frames = quantized_frames
+            self.data = torch.load("artefacts/drums_data.pt")
 
         def __len__(self):
-            return len(self.frames)
+            return len(self.data)
 
         def __getitem__(self, idx):
-            fp = self.df.iloc[idx]["filepath"]
-            frame = self.frames[idx][0][0][0]
-            return (encodec_to_audio_scale(frame), fp)
+            fp = self.data[idx]["filepath"]
+            embedding = self.data[idx]["encoded_frames_embeddings"][0]
+            return (embedding, fp)
 
     train_set = DrumfusionDataset()
 
