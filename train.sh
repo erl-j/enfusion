@@ -1,5 +1,5 @@
-export MODEL_NAME="CompVis/stable-diffusion-v1-5"
-export TRAIN_DIR="arrtefacts/aesd_dataset/"
+export MODEL_NAME="runwayml/stable-diffusion-v1-5"
+export TRAIN_DIR="artefacts/asdf_dataset/"
 
 accelerate launch --mixed_precision="fp16" train_text_to_image.py \
   --pretrained_model_name_or_path=$MODEL_NAME \

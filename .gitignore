@@ -4,6 +4,7 @@ data/
 wandb/
 dd-finetune/
 audio_demo/
+KillerBee samples/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

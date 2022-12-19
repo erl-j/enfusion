@@ -14,7 +14,26 @@ def audio_to_encodec_scale(audio):
     return ((audio + 1) / 2) * 1024
 
 
+def embedding2image( embeddings,min_value=-20,max_value=18):
+        # standard scale
+        embeddings = (embeddings - min_value) / (max_value - min_value)
+        # upscale to batch by 512 by 512
+        embeddings = torch.nn.functional.interpolate(
+            embeddings[:, None, ...], size=(512, 512), mode="bilinear"
+        )[:, 0, ...]
+        embeddings = (embeddings*255)[..., None].repeat([1, 1, 1, 3])
+        return embeddings
 
+def image2embedding( images,min_value=-20,max_value=18):
+    # turn into 0-1
+    images = images / 255
+    embeddings = torch.mean(images, dim=-1)
+    embeddings = torch.nn.functional.interpolate(
+        embeddings[:, None, ...], size=(128, 150), mode="bilinear"
+    )[:, 0, ...]
+    # turn into original scale
+    embeddings_hat = embeddings * (max_value - min_value) + min_value
+    return embeddings_hat
 
 class EncodecProcessor:
     def __init__(self, sample_rate):

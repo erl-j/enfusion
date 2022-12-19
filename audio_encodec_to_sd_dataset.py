@@ -6,6 +6,8 @@ from PIL import Image
 import json
 from tqdm import tqdm
 
+from encodec_processor import embedding2image,image2embedding
+
 class DrumfusionDataset(torch.utils.data.Dataset):
     def __init__(self):
         self.MIN_VALUE=-20
@@ -14,33 +16,10 @@ class DrumfusionDataset(torch.utils.data.Dataset):
         self.embeddings = torch.concat(
             [self.data[i]["encoded_frames_embeddings"] for i in range(len(self.data))], dim=0
         )
-        self.images = self.embedding2image(self.embeddings)
-
-       
+        self.images = embedding2image(self.embeddings,min_value=self.MIN_VALUE,max_value=self.MAX_VALUE)
 
     def __len__(self):
         return len(self.data)
-
-    def embedding2image(self, embeddings):
-        # standard scale
-        embeddings = (embeddings - self.MIN_VALUE) / (self.MAX_VALUE - self.MIN_VALUE)
-        # upscale to batch by 512 by 512
-        embeddings = torch.nn.functional.interpolate(
-            embeddings[:, None, ...], size=(512, 512), mode="bilinear"
-        )[:, 0, ...]
-        embeddings = (embeddings*255)[..., None].repeat([1, 1, 1, 3])
-        return embeddings
-
-    def image2embedding(self, images):
-        # turn into 0-1
-        images = images / 255
-        embeddings = torch.mean(images, dim=-1)
-        embeddings = torch.nn.functional.interpolate(
-            embeddings[:, None, ...], size=(128, 150), mode="bilinear"
-        )[:, 0, ...]
-        # turn into original scale
-        embedding_hat = embedding_hat * (self.MAX_VALUE - self.MIN_VALUE) + self.MIN_VALUE
-        return embedding_hat
 
     def export(self, output_dir):
         os.makedirs(output_dir, exist_ok=True)
@@ -52,8 +31,10 @@ class DrumfusionDataset(torch.utils.data.Dataset):
             
             pil_image = Image.fromarray(image.numpy().astype(np.uint8))
             pil_image.save(image_path)
-        with open(os.path.join(output_dir, "metadata.json"), "w") as f:
-            json.dump(metadata, f, indent=4)
+        with open(os.path.join(output_dir, "metadata.jsonl"), "w") as f:
+            # write json lines file
+            for line in metadata:
+                f.write(json.dumps(line) + "\n")
         
 
 
