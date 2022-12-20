@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+# forked from dance diffusion by zach evans
 import os
 import sys
 
@@ -34,6 +34,7 @@ from encodec_processor import (
     encodec_to_audio_scale,
 )
 import pandas as pd
+from misc import multiscale_loss
 
 
 # Define the noise schedule and sampling loop
@@ -103,7 +104,7 @@ def sample(model, x, steps, eta):
 
 
 class DiffusionUncond(pl.LightningModule):
-    def __init__(self, global_args):
+    def __init__(self, global_args,encodec_processor):
         super().__init__()
 
         DEPTH = 2
@@ -111,6 +112,7 @@ class DiffusionUncond(pl.LightningModule):
 
         C_MULTS = [i // 4 for i in [128, 128, 256, 256] + [512] * 10]
 
+        self.encodec_processor = encodec_processor
         self.diffusion = DiffusionAttnUnet1D(
             global_args,
             io_channels=global_args.num_channels,
@@ -148,8 +150,19 @@ class DiffusionUncond(pl.LightningModule):
 
         with torch.cuda.amp.autocast():
             v = self.diffusion(noised_reals, t)
-            mse_loss = F.mse_loss(v, targets)
-            loss = mse_loss
+
+            if self.global_args.loss == "mssl":
+                v_embed = v[:,:-1,:]
+                v_audio = self.encodec_processor.decode(v)
+
+                targets_embed = targets[:,:-1,:]
+                targets_audio = self.encodec_processor.decode(targets)
+
+                spectral_loss = multiscale_loss(v_audio, targets_audio, scales=[4096, 2048, 1024, 512, 256],overlap=0.75)
+                loss = spectral_loss
+            else:
+                mse_loss = F.mse_loss(v, targets)
+                loss = mse_loss
 
         log_dict = {
             "train/loss": loss.detach(),
@@ -201,18 +214,44 @@ class DemoCallback(pl.Callback):
 
         fakes = fakes.detach().cpu()
 
+        embeddings = fakes[:,:-1,:]
+        predicted_rms = fakes[:,-1:,:]
+        
         # decode here
         fakes = [
-            self.encodec_processor.decode_embeddings(fakes[i][None, ...])[0]
-            for i in range(fakes.shape[0])
+            self.encodec_processor.decode_embeddings(embeddings[i][None, ...])[0]
+            for i in range(embeddings.shape[0])
         ]
 
         fakes = torch.stack(fakes)
 
-        fakes = fakes / torch.max(torch.abs(fakes) + 1e-8)
+        # compute rms 
+        n_frames = embeddings[0][0].shape[-1]
 
+        # get wav frames
+        wav_frames = fakes.mean(dim=1,keepdim=True).reshape(fakes.shape[0], 1 ,n_frames,-1)
+
+        # compute rms per frames
+        rms = torch.sqrt(torch.mean(wav_frames**2, dim=-1))
+
+        # compute gain
+        gain = predicted_rms / (rms+1e-8)
+
+        # print(gain.shape, fakes.shape)
+        # print(rms.shape, predicted_rms.shape)
+
+        # upscale to shape of fakes with linear interpolation
+        gain = torch.nn.functional.interpolate(gain, size=fakes.shape[-1], mode='linear')
+
+        # print(gain.shape, fakes.shape)
+
+        # apply gain
+        #fakes = fakes * gain
+        
         # Put the demos together
         fakes = rearrange(fakes, "b d n -> d (b n)")
+
+        fakes = fakes / torch.max(torch.abs(fakes) + 1e-8)
 
         log_dict = {}
 
@@ -252,17 +291,16 @@ def main():
 
     class DrumfusionDataset(torch.utils.data.Dataset):
         def __init__(self):
-            self.data = torch.load("artefacts/kb_data.pt") + torch.load(
-                "artefacts/drums_data.pt"
-            )
-
+            self.data = torch.load("artefacts/kb_data.pt")
         def __len__(self):
             return len(self.data)
 
         def __getitem__(self, idx):
             fp = self.data[idx]["filepath"]
             embedding = self.data[idx]["encoded_frames_embeddings"][0]
-            return (embedding, fp)
+            rms = self.data[idx]["frame_rms"]
+            joint_embedding = torch.cat([embedding, rms], dim=0)
+            return (joint_embedding, fp)
 
     train_set = DrumfusionDataset()
 
@@ -292,7 +330,7 @@ def main():
     )
     demo_callback = DemoCallback(args, encodec_processor)
 
-    diffusion_model = DiffusionUncond(args)
+    diffusion_model = DiffusionUncond(args,encodec_processor=encodec_processor)
 
     wandb_logger.watch(diffusion_model)
     push_wandb_config(wandb_logger, args)
