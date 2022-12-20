@@ -112,7 +112,8 @@ class DiffusionUncond(pl.LightningModule):
 
         C_MULTS = [i // 4 for i in [128, 128, 256, 256] + [512] * 10]
 
-        self.encodec_processor = encodec_processor
+        # TODO: handle device in class instead
+        self.encodec_processor = encodec_processor.to(self.device).half()
         self.diffusion = DiffusionAttnUnet1D(
             global_args,
             io_channels=global_args.num_channels,
@@ -153,10 +154,10 @@ class DiffusionUncond(pl.LightningModule):
 
             if self.global_args.loss == "mssl":
                 v_embed = v[:,:-1,:]
-                v_audio = self.encodec_processor.decode(v)
+                v_audio = self.encodec_processor.decode_embeddings(v_embed)
 
                 targets_embed = targets[:,:-1,:]
-                targets_audio = self.encodec_processor.decode(targets)
+                targets_audio = self.encodec_processor.decode_embeddings(targets_embed)
 
                 spectral_loss = multiscale_loss(v_audio, targets_audio, scales=[4096, 2048, 1024, 512, 256],overlap=0.75)
                 loss = spectral_loss

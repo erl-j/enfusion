@@ -35,8 +35,9 @@ def image2embedding( images,min_value=-20,max_value=18):
     embeddings_hat = embeddings * (max_value - min_value) + min_value
     return embeddings_hat
 
-class EncodecProcessor:
+class EncodecProcessor(torch.nn.Module):
     def __init__(self, sample_rate):
+        super().__init__()
 
         self.sample_rate = sample_rate
 
