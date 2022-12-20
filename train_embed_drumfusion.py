@@ -216,7 +216,8 @@ class DemoCallback(pl.Callback):
 
         log_dict = {}
 
-        filename = f"audio_demo/demo_{trainer.global_step:08}.wav"
+        filename = f"artefacts/audio_demo/demo_{trainer.global_step:08}.wav"
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
         fakes = fakes.clamp(-1, 1).mul(32767).to(torch.int16).cpu()
         torchaudio.save(filename, fakes, self.sample_rate)
 
@@ -251,7 +252,9 @@ def main():
 
     class DrumfusionDataset(torch.utils.data.Dataset):
         def __init__(self):
-            self.data = torch.load("artefacts/drums_data.pt")
+            self.data = torch.load("artefacts/kb_data.pt") + torch.load(
+                "artefacts/drums_data.pt"
+            )
 
         def __len__(self):
             return len(self.data)
@@ -295,7 +298,7 @@ def main():
     push_wandb_config(wandb_logger, args)
 
     diffusion_trainer = pl.Trainer(
-        devices=[1],
+        devices=[0],
         accelerator="gpu",
         # num_nodes = args.num_nodes,
         # strategy='ddp',

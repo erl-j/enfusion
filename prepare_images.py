@@ -46,6 +46,9 @@ new_embeddings = deepcopy(embeddings)
 # standard scale
 new_embeddings = (embeddings - MIN) / (MAX - MIN)
 
+
+#%%
+
 #%%
 # upscale to batch by 512 by 512
 new_embeddings = torch.nn.functional.interpolate(

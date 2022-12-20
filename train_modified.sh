@@ -1,7 +1,7 @@
 export MODEL_NAME="runwayml/stable-diffusion-v1-5"
 export TRAIN_DIR="artefacts/scaled_aesd_dataset/"
 
-accelerate launch --mixed_precision="fp16" train_text_to_image.py \
+accelerate launch --mixed_precision="fp16" train_text_to_image_modified.py \
   --pretrained_model_name_or_path=$MODEL_NAME \
   --train_data_dir=$TRAIN_DIR \
   --use_ema \

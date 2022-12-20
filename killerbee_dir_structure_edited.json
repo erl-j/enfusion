@@ -1,0 +1,1214 @@
+{
+    "KillerBee samples": {
+        "Instruments": {
+            "Piano": {},
+            "Vibe": {
+                "Blazin Hip Hop": {}
+            },
+            "Flute": {},
+            "Pad": {},
+            "Synth": {
+                "Percussive": {}
+            },
+            "Electric Piano": {},
+            "Bass": {
+                "Synth Bass": {
+                    "Moog": {
+                        "Erik Jackson": {
+                            "c minor": {
+                                "cm_MinitaurSines": {},
+                                "cm_Darkside": {},
+                                "cm_BackMssg": {},
+                                "cm_Ghost": {},
+                                "cm_MinitaurTeeth": {},
+                                "cm_AlligatorNikes": {},
+                                "cm_HasTeeth": {},
+                                "cm_ThudRumble": {},
+                                "cm_SpineExam": {},
+                                "cm_ClassicTaur": {}
+                            },
+                            "a_minor": {
+                                "am_SineBeatdown": {},
+                                "am_FacePunch": {},
+                                "am_TaurBomb": {},
+                                "am_EvilGrin": {},
+                                "am_FaceOff": {},
+                                "am_TheTaur": {},
+                                "am_SlowSweep": {},
+                                "am_SqrPower": {},
+                                "am_SquarePlk": {},
+                                "am_WetStab": {}
+                            },
+                            "G_Minor": {
+                                "gm_Smart": {},
+                                "gm_LowEndTheories": {},
+                                "gm_GoDeep": {},
+                                "gm_Simple": {},
+                                "gm_Thwap": {},
+                                "gm_MiniGrowl": {},
+                                "gm_Chud": {},
+                                "gm_FlyLo": {},
+                                "gm_BigMouth": {},
+                                "gm_F-YourSpeakers": {}
+                            }
+                        }
+                    },
+                    "Short": {
+                        "Boom Bap Phonetics": {},
+                        "MPC60": {}
+                    },
+                    "Heavy": {
+                        "Blazin Hip Hop": {},
+                    }
+                },
+                "Electric Bass": {
+                    "Boom Bap Essentials": {}
+                },
+                "Sub Bass": {},
+                "Acoustic Bass": {}
+            },
+            "Bell": {},
+            "Xylophone": {},
+            "Brass": {}
+        },
+        "Kick": {
+            "Kick": {
+                "SHD": {
+                    "High Impact": {},
+                    "Sp-1200": {},
+                    "Hip Hop Domination": {
+                        "Kick Drums": {}
+                    }
+                },
+                "Mixtape Tool Kit": {
+                    "DARK": {},
+                    "VINYL": {
+                        "DRY_SHORT": {},
+                        "ROOM_LONG": {
+                            "Room_Long Set 2": {},
+                            "Room_Long Set 1": {}
+                        }
+                    }
+                },
+                "Aggressive Kit": {},
+                "Giant Vinyl Drums Pack": {},
+            },
+            "909 Kick": {},
+            "808 Kick ": {
+                "Tones": {
+                    "Boom Bap Phonetics": {},
+                },
+                "808 Kick": {}
+            }
+        },
+        "808 Subs": {
+            "808 Sub Kicks": {
+                "Tones": {},
+                "808 Sub Kicks": {}
+            },
+            "808 Trap Kicks": {
+                "808 Trap Kick Tones": {},
+                "808 Trap Kicks": {}
+            }
+        },
+        "FX": {
+            "Video games": {
+                "007 Goldeneye": {}
+            },
+            "Random:Noise": {
+                "Boom Bap Sound": {},
+            },
+            "Jet": {},
+            "Water": {
+                "Water Hit": {},
+                "Pouring Effect": {},
+                "Drip:Drop": {},
+                "Misc": {}
+            },
+            "Book": {},
+            "Scratches": {
+                "Blazin Hip Hop": {
+                    "20#04 special scratches": {},
+                    "20#03 crabs": {},
+                    "20#02 combo scratches": {},
+                    "20#01 baby scratches": {},
+                    "20#05 steps": {},
+                    "20#06 transformer scratches": {}
+                }
+            },
+            "Laser": {},
+            "Glass": {
+                "Glass break": {}
+            },
+            "Lighter": {},
+            "Air Horn": {},
+            "Flashlight": {},
+            "Coins": {},
+            "Dishwasher": {},
+            "Laugh": {},
+            "Ascent Sweeps": {},
+            "Space Design": {
+                "Snare": {}
+            },
+            "FX Sweeps": {},
+            "Stapler": {},
+            "Camera": {},
+            "Stomps": {},
+            "Clock": {},
+            "School Bell": {},
+            "Alarm Clock": {},
+            "Steps": {},
+            "Horn": {},
+            "Zap": {},
+            "Beer Froth": {},
+            "Paper Shredder": {},
+            "Guns": {
+                "Single Fire": {},
+                "Gun Cock": {},
+                "Automatic Fire": {}
+            },
+            "Rain": {},
+            "Cell Phone": {
+                "Trap Cell": {},
+                "Dial Tone": {},
+                "Dialing": {},
+                "iPhone": {},
+                "Misc": {}
+            },
+            "Walmart": {},
+            "Ambience": {
+                "Misc Real Life": {},
+                "Indoors": {
+                    "Bar": {},
+                    "Water": {},
+                    "Coffee Shop": {}
+                },
+                "Outdoors": {
+                    "St Pancras (train station)": {},
+                    "Street": {
+                        "Night": {},
+                        "Busy City Street": {}
+                    },
+                    "Nature": {
+                        "Birds Twitter": {},
+                        "Rain": {}
+                    }
+                },
+                "Crowd": {
+                    "Hollering": {},
+                    "Talking": {},
+                    "Cheering": {},
+                    "Applause": {}
+                }
+            },
+            "Glitch": {},
+            "Radio": {},
+            "Feet Echo": {},
+            "Descent Sweeps": {},
+            "Film Projector": {},
+            "Cash Register": {},
+            "Air Raid Alarm": {},
+            "Vinyl ": {
+                "Needle drop": {},
+                "Vinyl Backspins": {},
+                "Vinyl Scratches": {},
+                "Needle up": {},
+                "Vinyl Clicks": {
+                    "Single_Record_Clicks": {}
+                },
+                "Vinyl Spins:cuts": {
+                    "Mixtape Tool Kit": {
+                        "Cuts Medium": {},
+                        "Cuts Small": {}
+                    }
+                },
+                "Vinyl Crackle": {}
+            },
+            "VHS": {},
+            "Shower": {},
+            "Saw": {},
+            "Car Crash": {},
+            "Explosion": {},
+            "Heartbeat": {},
+            "Thunder": {}
+        },
+        "Instrument": {
+            "Saxophone": {
+                "Digable Planets": {
+                    "86 BPM": {},
+                    "100 BPM": {},
+                    "96 BPM": {}
+                }
+            },
+            "Guitar": {
+                "Acoustic Guitar": {
+                    "Loopmasters": {
+                        "FSA2_WAV_LOOPS": {
+                            "FSA2_100BPM_LOOPS": {},
+                            "FSA2_120BPM_LOOPS": {},
+                            "FSA2_130BPM_LOOPS": {},
+                            "FSA2_110BPM_LOOPS": {}
+                        }
+                    }
+                },
+                "Electric Guitar": {
+                    "Loop Masters": {},
+                    "Loopmasters": {
+                        "FLP_120_FUNK_GUITAR_LPS": {},
+                        "FLP_110_FUNK_GUITAR_LPS": {},
+                        "FLP_100_FUNK_GUITAR_LPS": {},
+                        "FLP_130_FUNK_GUITAR_LPS": {},
+                        "FLP_120_FUNK_WAH_LPS": {}
+                    },
+                    "MSXII": {
+                        "Guitar": {}
+                    },
+                    "Loop Lounge Raw Elements Jazz and Blues Guitar": {}
+                }
+            },
+            "Piano": {},
+            "Flute": {},
+            "Pad": {},
+            "Harp": {
+                "Loopmasters": {
+                    "ETHEREAL_HARP": {
+                        "OLH_HARP_LOOPS_90": {},
+                        "OLH_HARP_LOOPS_124": {},
+                        "OLH_HARP_LOOPS_110": {},
+                        "OLH_HARP_LOOPS_100": {}
+                    }
+                }
+            },
+            "Synth": {
+                "Pluck": {},
+                "Pad": {
+                    "Samplephonics": {
+                        "Raw Analogue Funk": {}
+                    }
+                },
+                "Arp": {
+                    "Samplephonics": {
+                        "Raw Analogue Funk": {}
+                    }
+                },
+                "Lead": {
+                    "Crystal Beats": {
+                        "Synths & Music": {}
+                    }
+                },
+                "Synth PIano": {}
+            },
+            "Electric Piano": {
+                "Loopmasters": {
+                    "130BPM_Electric_Piano_VK2": {},
+                    "RHO_WAV_LOOPS": {
+                        "RHO_CHORD_PROGRESSION_LOOPS": {
+                            "RHO_118_BPM_LOOPS": {},
+                            "RHO_123_BPM_LOOPS": {},
+                            "RHO_125_BPM_LOOPS": {},
+                            "RHO_110_BPM_LOOPS": {},
+                            "RHO_120_BPM_LOOPS": {},
+                            "RHO_127_BPM_LOOPS": {}
+                        },
+                        "RHO_RIFFS_AND_LEAD_LINE_LOOPS": {
+                            "RHO_120_BPM_VALVE_BLUES_LOOPS": {},
+                            "RHO_125_BPM_SOULFUL_HOUSE_LOOPS": {},
+                            "RHO_123_BPM_LATIN_LOVE_LOOPS": {},
+                            "RHO_120_BPM_FUNKBOX_LOOPS": {}
+                        },
+                        "RHO_SAMPLED_AND_PROCCESSED_LOOPS": {
+                            "RHO_123_BPM_SAMPLED_PROCCESSED_LOOPS": {},
+                            "RHO_127_BPM_SAMPLED_PROCCESSED_LOOPS": {},
+                            "RHO_120_BPM_SAMPLED_PROCCESSED_LOOPS": {},
+                            "RHO_125_BPM_SAMPLED_PROCCESSED_LOOPS": {}
+                        }
+                    }
+                },
+            },
+            "Bass": {
+                "Synth Bass": {
+                    "Raw Analogue Funk": {
+                        "120": {}
+                    },
+                    "Samplephonics": {
+                        "UK GRime": {
+                            "Bass": {}
+                        }
+                    },
+                    "Deep House": {
+                        "Puma Loops": {}
+                    }
+                },
+                "Electric Bass": {
+                    "Construction Kits": {
+                        "Crate Diggers": {}
+                    }
+                },
+                "Waveform": {},
+                "Sub Bass": {
+                    "Samplephonics": {}
+                }
+            },
+            "Bells": {},
+            "Organ": {
+                "Loop Masters": {},
+                "Maybach Music": {}
+            },
+            "Upright Bass": {
+                "Loopmasters": {
+                    "FLP_WAV_LOOPS": {
+                        "FLP_DOUBLEBASS_110": {},
+                        "FLP_DOUBLEBASS_140": {},
+                        "FLP_DOUBLE_BASS_90": {},
+                        "FLP_DOUBLEBASS_120": {},
+                        "FLP_DOUBLEBASS_160": {}
+                    }
+                }
+            },
+            "Vibraphone": {
+                "Samplephonics - Tuned Percussion MULTiFORMAT": {
+                    "One Shots": {},
+                    "Loops": {}
+                }
+            },
+            "Brass": {}
+        },
+        "HiHat": {
+            "Semi Open HiHat": {},
+            "HiHat": {},
+            "Open HiHat": {
+                "Acoustic": {},
+                "808": {}
+            }
+        },
+        "Drum Machines": {
+            "MPC 4000": {
+                "HiHats": {}
+            },
+            "Roland TR-808": {
+                "Clap": {},
+                "Kick": {},
+                "Triangle": {},
+                "Clave": {},
+                "Open Hat": {},
+                "Hi hat": {},
+                "Conga": {},
+                "Cymbal": {},
+                "Cowbell": {},
+                "Rim": {},
+                "Snares": {},
+                "Toms": {}
+            },
+            "MFB-522": {},
+            "SP-1200": {
+                "Tambourine": {},
+                "Shakers": {},
+                "Kicks": {},
+                "HiHat": {
+                    "Open HiHat": {}
+                }
+            },
+            "Alesis SR-16": {},
+            "Sakata DPM48": {},
+            "Kawai R-100": {},
+            "Korg DDM220": {},
+            "Korg DDM-110 ": {},
+            "Roland TR-909": {
+                "Drum Broker": {
+                    "RIMSHOT": {},
+                    "MID TOMS": {},
+                    "CRASH": {},
+                    "SNARE DRUM": {},
+                    "Hi Tom": {},
+                    "RIDE": {},
+                    "HIHAT": {},
+                    "CLAPS": {}
+                },
+                "Kicks": {},
+                "HiHat": {},
+                "Snare": {},
+                "Cymbals": {},
+                "Toms": {}
+            },
+            "Casio RZ-1": {},
+            "Kawai XD-5": {}
+        },
+        "Loops": {
+            "Instrument": {
+                "Saxophone": {},
+                "Synth": {
+                    "Pad": {},
+                    "Lead": {}
+                },
+                "Electric Piano": {
+                    "Loopmasters": {
+                        "RHO_WAV_LOOPS": {
+                            "RHO_CHORD_PROGRESSION_LOOPS": {
+                                "RHO_118_BPM_LOOPS": {},
+                                "RHO_123_BPM_LOOPS": {},
+                                "RHO_125_BPM_LOOPS": {},
+                                "RHO_120_BPM_LOOPS": {},
+                                "RHO_127_BPM_LOOPS": {}
+                            },
+                            "RHO_RIFFS_AND_LEAD_LINE_LOOPS": {
+                                "RHO_120_BPM_FUNKBOX_LOOPS": {}
+                            }
+                        }
+                    }
+                },
+                "Bass": {
+                    "Synth Bass": {
+                        "Raw Analogue Funk": {}
+                    },
+                    "Deep House": {}
+                },
+                "Electric Bass": {},
+                "Sub Bass": {}
+            },
+            "Vibraphone": {
+                "Samplephonics - Tuned Percussion MULTiFORMAT": {
+                    "Loops": {}
+                }
+            }
+        },
+        "Drums": {
+            "Full Drum Breaks": {
+                "SHD": {
+                    "89BPM Loops": {}
+                },
+                "Drum Broker": {
+                    "Breaks for Days-May 2017": {
+                        "16 BIT": {}
+                    },
+                    "Dirty Arse Drum Breaks Vol 2.5": {
+                        "87 BPM": {},
+                        "86 BPM": {},
+                        "82 BPM": {},
+                        "97 BPM": {},
+                        "108 BPM": {},
+                        "104 BPM": {},
+                        "109 BPM": {},
+                        "81 BPM": {},
+                        "94 BPM": {},
+                        "93 BPM": {},
+                        "100 BPM": {},
+                        "99 BPM": {},
+                        "111 BPM": {},
+                        "113 BPM": {},
+                        "112 BPM": {},
+                        "98 BPM": {},
+                        "103 BPM": {},
+                        "107 BPM": {},
+                        "102 BPM": {},
+                        "85 BPM": {},
+                        "95 BPM": {},
+                        "89 BPM": {},
+                        "90 BPM": {},
+                        "92 BPM": {},
+                        "96 BPM": {},
+                        "101 BPM": {},
+                        "116 BPM": {},
+                        "91 BPM": {},
+                        "84 BPM": {}
+                    }
+                },
+                "Sensei Beatz": {
+                    "DRUM LOOPS": {}
+                },
+                "Antihero Breaks": {},
+                "Digable Planets": {
+                    "86 BPM": {},
+                    "100 BPM": {},
+                    "96 BPM": {}
+                },
+                "XIXX": {
+                    "81": {},
+                    "83": {},
+                    "89": {}
+                },
+                "Minty Breaks": {
+                    "Minty Breaks 2": {}
+                },
+                "Digging Drums and Breaks ": {
+                    "4-VINYL": {
+                        "VINYL DRUM BREAKS AND SINGLE HITS": {
+                            "VINYL BREAK042": {},
+                            "VINYL BREAK023": {},
+                            "VINYL BREAK081": {},
+                            "VINYL BREAK018": {},
+                            "VINYL BREAK064": {},
+                            "VINYL BREAK040": {},
+                            "VINYL BREAK080": {},
+                            "VINYL BREAK084": {},
+                            "VINYL BREAK001": {},
+                            "VINYL BREAK099": {},
+                            "VINYL BREAK032": {},
+                            "VINYL BREAK020": {},
+                            "VINYL BREAK073": {},
+                            "VINYL BREAK036": {},
+                            "VINYL BREAK048": {},
+                            "VINYL BREAK052": {},
+                            "VINYL BREAK077": {},
+                            "VINYL BREAK016": {},
+                            "VINYL BREAK075": {},
+                            "VINYL BREAK021": {},
+                            "VINYL BREAK054": {}
+                        },
+                        "VINYL BREAKS": {},
+                        "VINYL SINGLE HITS": {
+                            "VINYL SNARES": {}
+                        }
+                    },
+                    "2-GRIMEY": {
+                        "GRIMEY BREAKS": {},
+                        "GRIMEY BREAKS AND SINGLE HITZ": {
+                            "GRIMEY BREAK088": {},
+                            "GRIMEY BREAK099": {},
+                            "GRIMEY BREAK048": {},
+                            "GRIMEY BREAK049": {},
+                            "GRIMEY BREAK075": {},
+                            "GRIMEY BREAK094": {},
+                            "GRIMEY BREAK036": {},
+                            "GRIMEY BREAK058": {},
+                            "GRIMEY BREAK 102": {},
+                            "GRIMEY BREAK087": {},
+                            "GRIMEY BREAK071": {},
+                            "GRIMEY BREAK010": {},
+                            "GRIMEY BREAK045": {},
+                            "GRIMEY BREAK072": {},
+                            "GRIMEY BREAK082": {},
+                            "GRIMEY BREAK057": {},
+                            "GRIMEY BREAK044": {},
+                            "GRIMEY BREAK038": {},
+                            "GRIMEY BREAK032": {},
+                            "GRIMEY BREAK012": {},
+                            "GRIMEY BREAK022": {},
+                            "GRIMEY BREAK047": {},
+                            "GRIMEY BREAK092": {},
+                            "GRIMEY BREAK030": {},
+                            "GRIMEY BREAK074": {},
+                            "GRIMEY BREAK078": {},
+                            "GRIMEY BREAK091": {},
+                            "GRIMEY BREAK027": {},
+                            "GRIMEY BREAK014": {},
+                            "GRIMEY BREAK019": {},
+                            "GRIMEY BREAK006": {},
+                            "GRIMEY BREAK052": {},
+                            "GRIMEY BREAK037": {},
+                            "GRIMEY BREAK093": {},
+                            "GRIMEY BREAK096": {},
+                            "GRIMEY BREAK018": {},
+                            "GRIMEY BREAK077": {},
+                            "GRIMEY BREAK015": {},
+                            "GRIMEY BREAK016": {},
+                            "GRIMEY BREAK002": {},
+                            "GRIMEY BREAK053": {}
+                        },
+                        "GRIMEY SINGLE HITZ": {
+                            "GRIMEY KIKS": {},
+                            "GRIMEY SNARES": {},
+                            "GRIMEY HATS": {}
+                        }
+                    },
+                    "3-SOUL": {
+                        "SOUL BREAKS AND SINGLE HITZ": {
+                            "SOUL BREAK070": {},
+                            "SOUL BREAK077": {},
+                            "SOUL BREAK093": {},
+                            "SOUL BREAK086": {},
+                            "SOUL BREAK022": {},
+                            "SOUL BREAK056": {},
+                            "SOUL BREAK061": {},
+                            "SOUL BREAK098": {},
+                            "SOUL BREAK080": {},
+                            "SOUL BREAK089": {},
+                            "SOUL BREAK036": {},
+                            "SOUL BREAK030": {},
+                            "SOUL BREAK068": {},
+                            "SOUL BREAK019": {},
+                            "SOUL BREAK066": {},
+                            "SOUL BREAK084": {},
+                            "SOUL BREAK004": {},
+                            "SOUL BREAK005": {},
+                            "SOUL BREAK060": {},
+                            "SOUL BREAK085": {},
+                            "SOUL BREAK013": {},
+                            "SOUL BREAK043": {},
+                            "SOUL BREAK042": {},
+                            "SOUL BREAK018": {},
+                            "SOUL BREAK075": {},
+                            "SOUL BREAK069": {},
+                            "SOUL BREAK051": {},
+                            "SOUL BREAK045": {},
+                            "SOUL BREAK012": {},
+                            "SOUL BREAK028": {},
+                            "SOUL BREAK034": {},
+                            "SOUL BREAK015": {},
+                            "SOUL BREAK057": {},
+                            "SOUL BREAK046": {},
+                            "SOUL BREAK067": {},
+                            "SOUL BREAK082": {},
+                            "SOUL BREAK014": {},
+                            "SOUL BREAK050": {},
+                            "SOUL BREAK063": {},
+                            "SOUL BREAK011": {},
+                            "SOUL BREAK025": {},
+                            "SOUL BREAK092": {},
+                            "SOUL BREAK026": {},
+                            "SOUL BREAK048": {},
+                            "SOUL BREAK009": {},
+                            "SOUL BREAK059": {},
+                            "SOUL BREAK065": {},
+                            "SOUL BREAK099": {},
+                            "SOUL BREAK041": {},
+                            "SOUL BREAK039": {},
+                            "SOUL BREAK074": {},
+                            "SOUL BREAK081": {},
+                            "SOUL BREAK027": {},
+                            "SOUL BREAK087": {},
+                            "SOUL BREAK052": {},
+                            "SOUL BREAK053": {},
+                            "SOUL BREAK003": {},
+                            "SOUL BREAK058": {},
+                            "SOUL BREAK037": {}
+                        },
+                        "SOUL SINGLE HITZ": {
+                            "SOUL KIKS": {},
+                            "SOUL HATS": {},
+                            "SOUL SNARES": {}
+                        },
+                        "SOUL BREAKS": {}
+                    },
+                    "5-ALL VINYL DRUMS SAMPLES and EXTRAS": {
+                        "1-VINYL KICKS": {},
+                        "4-VINYL OPHATS": {},
+                        "2-VINYL SNARES": {},
+                        "3-VINYL HATS": {}
+                    },
+                    "1-DIRTY": {
+                        "DIRTY BREAKS AND SINGLE HITZ": {
+                            "DIRTY BREAK087": {},
+                            "DIRTY BREAK035": {},
+                            "DIRTY BREAK098": {},
+                            "DIRTY BREAK021": {},
+                            "DIRTY BREAK054": {},
+                            "DIRTY BREAK071": {},
+                            "DIRTY BREAK074": {},
+                            "DIRTY BREAK016": {},
+                            "DIRTY BREAK025": {},
+                            "DIRTY BREAK052": {},
+                            "DIRTY BREAK086": {},
+                            "DIRTY BREAK101": {},
+                            "DIRTY BREAK008": {},
+                            "DIRTY BREAK046": {},
+                            "DIRTY BREAK006": {},
+                            "DIRTY BREAK030": {},
+                            "DIRTY BREAK007": {},
+                            "DIRTY BREAK040": {},
+                            "DIRTY BREAK015": {},
+                            "DIRTY BREAK072": {},
+                            "DIRTY BREAK064": {},
+                            "DIRTY BREAK075": {},
+                            "DIRTY BREAK005": {},
+                            "DIRTY BREAK066": {},
+                            "DIRTY BREAK095": {},
+                            "DIRTY BREAK051": {},
+                            "DIRTY BREAK080": {},
+                            "DIRTY BREAK050": {},
+                            "DIRTY BREAK044": {},
+                            "DIRTY BREAK029": {},
+                            "DIRTY BREAK001": {},
+                            "DIRTY BREAK042": {},
+                            "DIRTY BREAK081": {},
+                            "DIRTY BREAK012": {},
+                            "DIRTY BREAK009": {},
+                            "DIRTY BREAK020": {},
+                            "DIRTY BREAK004": {},
+                            "DIRTY BREAK032": {},
+                            "DIRTY BREAK069": {},
+                            "DIRTY BREAK061": {},
+                            "DIRTY BREAK083": {},
+                            "DIRTY BREAK036": {},
+                            "DIRTY BREAK022": {},
+                            "DIRTY BREAK076": {},
+                            "DIRTY BREAK063": {},
+                            "DIRTY BREAK034": {},
+                            "DIRTY BREAK053": {},
+                            "DIRTY BREAK043": {},
+                            "DIRTY BREAK067": {},
+                            "DIRTY BREAK048": {},
+                            "DIRTY BREAK011": {},
+                            "DIRTY BREAK077": {},
+                            "DIRTY BREAK024": {},
+                            "DIRTY BREAK097": {},
+                            "DIRTY BREAK039": {},
+                            "DIRTY BREAK099": {},
+                            "DIRTY BREAK089": {},
+                            "DIRTY BREAK079": {},
+                            "DIRTY BREAK028": {}
+                        },
+                        "DIRTY SINGLE HITZ": {
+                            "DIRTY OH": {},
+                            "DIRTY KIKS": {},
+                            "DIRTY SNARES": {},
+                            "DIRTY HATS": {}
+                        },
+                        "DIRTY BREAKS": {}
+                    }
+                },
+                "Loopmasters": {
+                    "Vintage Soul": {
+                        "VVS_DRUMS": {}
+                    }
+                },
+                "DJ Muggs": {},
+                "Pro Tools": {
+                    "Hip Hop": {},
+                    "Acid Jazz": {},
+                    "South": {}
+                },
+                "Boom Bap City": {
+                    "Crate 2": {},
+                    "Crate 1": {}
+                },
+                "Bad Friend Breaks": {},
+                "MSXII": {},
+                "Jazz Essentials": {
+                    "Jazz Essentials IV": {
+                        "Jazz Essentials IV Latin and 3_4 Jazz 16 Bit WAV": {
+                            "Jazz Kit Single Hit Samples 16 Bit WAV": {}
+                        }
+                    }
+                },
+                "Sonic Mechanics": {
+                    "BBB_CLEAN_BREAKS": {},
+                    "Processed": {}
+                },
+                "Boom Bap Labs": {
+                    "Drumline Obscuro Series Vols.1-5": {
+                        "Boom.Bap.Labs.Drumline.Obscuro.Series.Vol.1.WAV-DRUMKIDS": {},
+                        "Boom.Bap.Labs.Drumline.Obscuro.Series.Vol.2.WAV-DRUMKIDS": {}
+                    }
+                },
+                "Raw Breaks": {
+                    "94": {},
+                    "81": {}
+                },
+                "Tombongo": {},
+                "Turntablist": {},
+                "Soul Patrol": {},
+                "A Million Ways To Break": {
+                    "Vol 2": {
+                        "KS - Green, Gold _ Black": {},
+                        "KS - Can You Hear This": {},
+                        "KS - Agricultural Scenes": {},
+                        "KS - The Ways": {},
+                        "KS - Get Down": {}
+                    },
+                    "Vol 1": {
+                        "KS - Jungle Lo Mein": {},
+                        "KS - Janice": {},
+                        "KS - To Lose": {},
+                        "KS - Alright": {},
+                        "KS - Mondo Jam": {},
+                        "KS - Love Me": {},
+                        "KS - Wild Thing": {},
+                        "KS - Satisfied": {},
+                        "KS - Face Towards Heaven": {},
+                        "KS - Repentance": {},
+                        "KS - Donkey Flames": {},
+                        "KS - The Blue": {},
+                        "KS - Scorpions": {},
+                        "KS - Marred": {},
+                        "KS - Col Salts Popular Diamond Group": {}
+                    }
+                },
+                "Samplephonics": {
+                    "Dream Cycles": {},
+                    "Boutique Hip Hop": {},
+                    "Raw Analogue Funk": {
+                        "120": {}
+                    },
+                    "Cosmic Hip Hop": {},
+                    "English Breaks": {},
+                    "Classic Hip Hop Cuts": {},
+                    "We Sink Future RnB": {},
+                    "Hip Hop Crate Diggers 2": {},
+                    "Vintage Soul": {},
+                    "Dusty Hip Hop Grooves": {},
+                    "VintageDrumBreaks1": {},
+                    "Organic": {},
+                    "MetaBeats": {},
+                    "UK Grime": {},
+                    "Hash Fingers": {},
+                    "Crunchy Drumbreaks": {},
+                    "Boom Bap Beats _ Pieces": {
+                        "Drum Loops Tube": {}
+                    }
+                },
+                "Paul Nice Rare": {},
+                "Boom Bap DK": {},
+                "J Cole": {},
+                "Boom Bap Legends": {},
+                "300 Essential": {},
+                "Loop Loft": {},
+                "Rare Funk Breaks": {},
+                "Dirty Arse Breaks": {
+                    "87 BPM": {},
+                    "97 BPM": {},
+                    "115 BPM": {},
+                    "85 BPM": {},
+                    "90 BPM": {}
+                },
+                "Surge Sounds": {
+                    "_(Bonus)_Drum_Loops_(128BPM)": {
+                        "_Beat_02": {
+                            "_(MIDIs)": {}
+                        },
+                        "_Beat_03": {},
+                        "_Beat_10": {
+                            "_(MIDIs)": {}
+                        }
+                    }
+                },
+                "Decay Drums": {
+                    "EDM_House": {
+                        "_Drum_Loops_Kit_128BPM": {
+                            "Future_Drum_Loop_11_128BPM": {},
+                            "Future_Drum_Loop_13_128BPM": {},
+                            "Future_Drum_Loop_10_128BPM": {},
+                            "Future_Drum_Loop_02_128BPM": {},
+                            "Future_Drum_Loop_09_128BPM": {},
+                            "Future_Drum_Loop_01_128BPM": {}
+                        },
+                        "_Drum_Loops_Kit_125BPM": {
+                            "Future_Drum_Loop_08_125BPM": {},
+                            "Future_Drum_Loop_05_125BPM": {}
+                        }
+                    }
+                },
+                "BeatMasters": {},
+                "Cardiak": {},
+                "Saito": {},
+                "Grimm Doza": {},
+                "upper class": {},
+                "Funk Drum Breaks": {},
+                "Beat Butcha": {}
+            },
+            "Drum Fills": {
+                "Digable Planets": {
+                    "86 BPM": {}
+                }
+            },
+            "Mixed_Top Loops": {
+                "Decay Drums": {
+                    "_Top_Loops_128BPM": {}
+                }
+            },
+            "Drum Rolls": {
+                "!llmind": {}
+            },
+            "HiHat Loops": {
+                "Sensei Beatz": {},
+                "Empire": {},
+                "Kerreck": {},
+                "XIXX": {},
+                "Loopmasters": {},
+                "Croup": {},
+                "Samplephonics": {
+                    "Boom Bap Pieces": {}
+                },
+                "Boom Bap Ultimate": {},
+                "MIDI Boys": {
+                    "umru": {}
+                },
+                "Cardiak": {}
+            }
+        },
+        "Song Samples": {},
+        "Percussion ": {
+            "Shaker": {
+                "Shaker": {
+                    "Samplephonics": {
+                        "Eastern Percussion": {
+                            "Groove 2 100BPM": {},
+                            "One Shots": {
+                                "Shakers": {},
+                                "Drums": {},
+                                "Bells": {},
+                                "Cymbals": {},
+                                "Percussion": {}
+                            },
+                            "Groove 8 100BPM": {},
+                            "Groove 7 110BPM": {},
+                            "Groove 7 100BPM": {},
+                            "Groove 6 100BPM": {},
+                            "Groove 2 110BPM": {},
+                            "Groove 1 100BPM": {},
+                            "Groove 4 110BPM": {},
+                            "Groove 4  90BPM": {},
+                            "Groove 2 90BPM": {},
+                            "Groove 8 90BPM": {},
+                            "Loops": {
+                                "Eastern Grooves": {
+                                    "Groove 2 100BPM": {},
+                                    "Groove 3 80BPM": {},
+                                    "Groove 5 100BPM": {},
+                                    "Groove 5 80BPM": {},
+                                    "Groove 7 100BPM": {},
+                                    "Groove 1 100BPM": {},
+                                    "Groove 2 90BPM": {},
+                                    "Groove 8 90BPM": {},
+                                    "Groove 4 90BPM": {},
+                                    "Groove 4 100BPM": {},
+                                    "Groove 7 90BPM": {},
+                                    "Groove 7 80BPM": {},
+                                    "Groove 3 90BPM": {},
+                                    "Groove 3 100BPM": {},
+                                    "Groove 5 90BPM": {},
+                                    "Groove 9 90BPM": {},
+                                    "Groove 4 80BPM": {},
+                                    "Groove 6 80BPM": {},
+                                    "Groove 1 80BPM": {},
+                                    "Groove 1 90BPM": {},
+                                    "Groove 9 80BPM": {},
+                                    "Groove 6 90BPM": {},
+                                    "Groove 2 80BPM": {},
+                                    "Groove 8 80BPM": {}
+                                }
+                            },
+                            "Groove 3 90BPM": {},
+                            "Groove 3 100BPM": {},
+                            "Groove 9 90BPM": {},
+                            "Groove 1 90BPM": {}
+                        },
+                        "Boom Bap Pieces": {}
+                    },
+                    "Boom Bap Ultimate": {}
+                },
+                "Shaker Rattle": {
+                    "Beat Butcha": {}
+                }
+            },
+            "Random_Noise": {
+                "Samplephonics": {
+                    "Experimental": {}
+                },
+                "Tambourine": {
+                    "Tambourine": {
+                        "Loopmasters": {},
+                        "Pro Tools": {}
+                    }
+                },
+                "Perc Loops": {
+                    "Cymatics": {
+                        "Infinity House (Future)": {
+                            "Perc Loops": {}
+                        }
+                    }
+                }
+            }
+        },
+        "Vox": {
+            "Chant:Grunt:What": {},
+            "Beat Box": {},
+            "Spoken Word": {},
+            "Stabs": {
+                "Iconic Stabs": {},
+                "Stabs": {}
+            },
+            "Samples:Notes": {
+                "Blazin Hip Hop": {
+                    "Female": {},
+                    "Male": {
+                        "18#01 male vocals": {},
+                        "18#02 pitched male vocals": {}
+                    }
+                }
+            }
+        },
+        "Snare": {
+            "Clap": {
+                "Clap": {},
+                "Reverse Clap": {
+                    "Clapz & Snares": {}
+                }
+            },
+            "Snareclap": {},
+            "Snare": {
+                "Mixtape Tool Kit": {
+                    "VINYL SN wHAT": {
+                        "VINYL SN wHat Set 3": {},
+                        "VINYL SN wHat Set 2": {},
+                        "VINYL SN wHat Set 4": {},
+                        "VINYL SN wHat Set 1": {}
+                    },
+                    "VINYL SN ROUND_DARK": {
+                        "Vinyl SN ROUND_DARK Set 2": {},
+                        "Vinyl SN ROUND_DARK Set 1": {}
+                    },
+                    "VINYL SNARES wRING": {
+                        "VINYL SNARES wRing Set 2": {},
+                        "VINYL SNARES wRing Set 1": {}
+                    },
+                    "VINYL Thrashy Snares": {
+                        "DRY": {
+                            "Trashy Dry Set 2": {},
+                            "Trashy Dry Set 1": {}
+                        },
+                        "WITH ROOM": {
+                            "Trashy With Room Set 1": {},
+                            "Trashy With Room Set 2": {}
+                        }
+                    }
+                }
+            },
+            "Snap": {},
+            "Rim": {
+                "808 Rim": {},
+                "Rim": {}
+            }
+        },
+        "Cymbals": {
+            "China:Splash": {},
+            "Cymbal Roll": {},
+            "Crash": {},
+            "FX": {},
+            "808": {},
+            "Ride": {},
+            "Choke Cymbal": {},
+            "Reverse Crash": {}
+        },
+        "Percussion": {
+            "Flexitone": {},
+            "Shaker": {
+                "Shaker": {
+                    "Shaker": {
+                        "Raw Shakers": {
+                            "Shaker": {}
+                        },
+                        "SP-1200": {
+                            "Shakers": {},
+                            "Kicks": {},
+                            "HiHat": {
+                                "Open HiHat": {}
+                            }
+                        },
+                        "Rattle": {}
+                    },
+                    "Metal Shaker": {},
+                    "Pills": {
+                        "Purple Pill": {},
+                        "Blue Pill": {},
+                        "Red Pill": {}
+                    },
+                    "Seedshell Shaker": {}
+                },
+                "Random:Noise": {},
+                "Tambourine": {
+                    "Tambourine": {},
+                    "Tambourine Roll:Shake": {}
+                },
+                "Cabassa": {},
+                "Timbales": {},
+                "Stick": {},
+                "Knock": {},
+                "Djembe": {},
+                "Glass": {},
+                "Maracas": {},
+                "Ankle Bell": {},
+                "Gong": {},
+                "Taiko": {},
+                "Coins": {},
+                "Triangle": {
+                    "Triangle": {},
+                    "Muted": {},
+                    "808 triangle": {}
+                },
+                "Windchimes": {},
+                "Timpani": {},
+                "Vibra Slap": {},
+                "Clave": {
+                    "Clave": {
+                        "808 Mafia": {}
+                    },
+                    "808 Clave": {}
+                },
+                "Perc Hit": {},
+                "Hosho": {
+                    "Akai": {}
+                },
+                "Bento Shaker: Shells": {
+                    "Bento Shaker": {},
+                    "Bento Shaker Rattle": {}
+                },
+                "Frame Drums": {},
+                "Clap Perc": {},
+                "Washboard": {},
+                "Change Cup": {
+                    "Beggar's Cup": {},
+                    "Change Tap": {}
+                },
+                "Clicks": {},
+                "Chimes": {
+                    "Percussion Chimes": {
+                        "Sprinkle": {},
+                        "Slow Strum": {},
+                        "Fast Strum": {}
+                    },
+                    "Wind Chimes_IRL": {},
+                    "Hit": {}
+                },
+                "Guiro": {},
+                "Castanet": {},
+                "Agogo": {},
+                "Glass Jar": {},
+                "Conga": {},
+                "Timbale": {},
+                "Jinglebell": {},
+                "Metal": {},
+                "Bongo": {},
+                "Bell": {},
+                "Rain Stick": {},
+                "Finger Cymbals (zill)": {},
+                "Cuica": {},
+                "Tabla": {},
+                "Cowbell": {
+                    "Acoustic": {},
+                    "808": {}
+                },
+                "Bougarabou": {},
+                "Woodblock": {},
+                "Darabuka": {},
+                "Keychain": {}
+            },
+            "Toms": {
+                "High Toms": {
+                    "Acoustic Drum Kit": {
+                        "Gretsch": {
+                            "Rack Tom Hi": {}
+                        }
+                    }
+                },
+                "Various Toms": {},
+                "Mid Toms": {
+                    "Acoustic Drum Kit": {
+                        "Gretsch": {
+                            "Rack Tom Low": {}
+                        },
+                        "Loop Masters": {}
+                    }
+                },
+                "Low Toms": {
+                    "Acoustic Drum Kit": {
+                        "Loop Masters": {},
+                        "Gretcsch": {
+                            "Floor Tom Low": {},
+                            "Floor Tom Hi": {}
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

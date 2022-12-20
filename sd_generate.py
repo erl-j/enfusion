@@ -9,10 +9,15 @@ import IPython.display
 from encodec_processor import EncodecProcessor,image2embedding,embedding2image
 from audio_encodec_to_sd_dataset import DrumfusionDataset
 import numpy as np
+import torchaudio
+import matplotlib.pyplot as plt
+from PIL import Image
 
 #%%
 
-model_path = "./enfusion/artefacts/sd-asdf"
+MODEL_NAME="sd-scaled-asdf"
+
+model_path = f"./artefacts/{MODEL_NAME}"
 pipe = StableDiffusionPipeline.from_pretrained(model_path, torch_dtype=torch.float16)
 pipe.to("cuda")
 
@@ -24,21 +29,42 @@ def dummy(images, **kwargs):
 
 pipe.safety_checker = dummy
 
+ds = DrumfusionDataset()
 
 #%%
-image = pipe(prompt="snare", guidance_scale=7).images[0]
-image.show()
 
-im = torch.tensor(np.array(image))
+for prompt in ["kick"]:#,"kick","hihat","crash"]:
+    wavs=[]
+    for i in range(10):
+        image = pipe(prompt=prompt,guidance_scale=7.0,num_inference_steps=50).images[0]
+        # image.show()
+        im = torch.tensor(np.array(image)).to(torch.float32)[None, ...]
 
-embedding = image2embedding(im[None,...], min_value=-20, max_value=18)
 
-SAMPLE_RATE=48000
-encodec_processor = EncodecProcessor(SAMPLE_RATE)
+        # load image from 
+        #filename = f"./artefacts/scaled_aesd_dataset/{i}.png"
+        #im = torch.tensor(np.array(Image.open(filename))).to(torch.float32)[None, ...]
 
-wav = encodec_processor.decode_embeddings(embedding)
+        embedding = ds.image2embedding(im)
 
-IPython.display.Audio(wav[0].detach().cpu().numpy(), rate=SAMPLE_RATE)
+        SAMPLE_RATE=48000
+        encodec_processor = EncodecProcessor(SAMPLE_RATE)
 
+        # plt.imshow(embedding[0], aspect="auto")
+        # plt.show()
+
+        wav = encodec_processor.decode_embeddings(embedding.to(torch.float32))
+
+        wavs.append(wav)
+
+    wav = torch.concat(wavs, dim=-1)[0]
+    IPython.display.Audio(wav.detach().cpu().numpy(), rate=SAMPLE_RATE)
+
+    # play audio
+    IPython.display.Audio(wav.detach().cpu().numpy(), rate=SAMPLE_RATE)
+
+    wav = wav/torch.max(torch.abs(wav)+1e-8)
+    # save to file
+    torchaudio.save(f"./artefacts/demos/{MODEL_NAME}_prompt={prompt}.wav", wav, SAMPLE_RATE)
 
 # %%
