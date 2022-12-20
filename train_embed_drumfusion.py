@@ -35,7 +35,7 @@ from encodec_processor import (
 )
 import pandas as pd
 from misc import multiscale_loss
-
+from models import RecurrentScore
 
 # Define the noise schedule and sampling loop
 def get_alphas_sigmas(t):
@@ -114,13 +114,14 @@ class DiffusionUncond(pl.LightningModule):
 
         # TODO: handle device in class instead
         self.encodec_processor = encodec_processor.to(self.device).half()
-        self.diffusion = DiffusionAttnUnet1D(
-            global_args,
-            io_channels=global_args.num_channels,
-            n_attn_layers=4,
-            depth=DEPTH,
-            c_mults=C_MULTS,
-        )
+        # self.diffusion = DiffusionAttnUnet1D(
+        #     global_args,
+        #     io_channels=global_args.num_channels,
+        #     n_attn_layers=4,
+        #     depth=DEPTH,
+        #     c_mults=C_MULTS,
+        # )
+        self.diffusion = RecurrentScore(in_channels=global_args.num_channels)
         self.diffusion_ema = deepcopy(self.diffusion)
         self.rng = torch.quasirandom.SobolEngine(
             1, scramble=True, seed=global_args.seed
@@ -149,25 +150,28 @@ class DiffusionUncond(pl.LightningModule):
         noised_reals = reals * alphas + noise * sigmas
         targets = noise * alphas - reals * sigmas
 
+        loss=0
+        log_dict = {}
+
         with torch.cuda.amp.autocast():
             v = self.diffusion(noised_reals, t)
 
             if self.global_args.loss == "mssl":
                 v_embed = v[:,:-1,:]
-                v_audio = self.encodec_processor.decode_embeddings(v_embed)
-
+                v_audio = self.encodec_processor.decode_embeddings(v_embed).mean(dim=1)
                 targets_embed = targets[:,:-1,:]
-                targets_audio = self.encodec_processor.decode_embeddings(targets_embed)
-
+                targets_audio = self.encodec_processor.decode_embeddings(targets_embed).mean(dim=1)
                 spectral_loss = multiscale_loss(v_audio, targets_audio, scales=[4096, 2048, 1024, 512, 256],overlap=0.75)
-                loss = spectral_loss
-            else:
-                mse_loss = F.mse_loss(v, targets)
-                loss = mse_loss
+                spectral_loss = spectral_loss * 0.01
+                loss += spectral_loss
+                log_dict["train/spectral_loss"] = spectral_loss.detach()
+            
+            mse_loss = F.mse_loss(v, targets)
+            loss += mse_loss
+            log_dict["train/mse_loss"] = mse_loss.detach()
 
         log_dict = {
             "train/loss": loss.detach(),
-            "train/mse_loss": mse_loss.detach(),
         }
 
         self.log_dict(log_dict, prog_bar=True, on_step=True)
@@ -213,7 +217,7 @@ class DemoCallback(pl.Callback):
 
         fakes = sample(module.diffusion_ema, noise, self.demo_steps, 0)
 
-        fakes = fakes.detach().cpu()
+        fakes = fakes.detach().half()
 
         embeddings = fakes[:,:-1,:]
         predicted_rms = fakes[:,-1:,:]

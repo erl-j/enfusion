@@ -16,7 +16,7 @@ def multiscale_fft(signal, scales, overlap):
             return_complex=True,
         ).abs()
         stfts.append(S)
-    return
+    return stfts
 
 
 def safe_log(x):
@@ -40,3 +40,4 @@ def multiscale_loss(s, y, scales, overlap, lin_weight=1, log_weight=1):
         lin_loss = (s_x - s_y).abs().mean()
         log_loss = (safe_log(s_x) - safe_log(s_y)).abs().mean()
         loss = loss + lin_loss * lin_weight + log_loss * log_weight
+    return loss
