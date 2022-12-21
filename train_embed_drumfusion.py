@@ -166,13 +166,18 @@ class DiffusionUncond(pl.LightningModule):
                 loss += spectral_loss
                 log_dict["train/spectral_loss"] = spectral_loss.detach()
             
-            mse_loss = F.mse_loss(v, targets)
-            loss += mse_loss
-            log_dict["train/mse_loss"] = mse_loss.detach()
+            if self.global_args.loss == "z_mse":
+                mse_loss = F.mse_loss(v, targets)
+                loss += mse_loss
+                log_dict["train/mse_loss"] = mse_loss.detach()
 
-        log_dict = {
-            "train/loss": loss.detach(),
-        }
+            if self.global_args.loss == "z_l1":
+                l1_loss = F.l1_loss(v, targets)
+                loss += l1_loss
+                log_dict["train/l1_loss"] = l1_loss.detach()
+
+        log_dict["train/loss"] = loss.detach()
+
 
         self.log_dict(log_dict, prog_bar=True, on_step=True)
         return loss
