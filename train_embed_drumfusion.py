@@ -107,13 +107,13 @@ class DiffusionUncond(pl.LightningModule):
     def __init__(self, global_args,encodec_processor):
         super().__init__()
 
-        DEPTH = 2
-        # C_MULTS = [128, 128, 256, 256] + [512] * 10
+        
 
-        C_MULTS = [i // 4 for i in [128, 128, 256, 256] + [512] * 10]
-
-        # TODO: handle device in class instead
         self.encodec_processor = encodec_processor.to(self.device).half()
+
+        # DEPTH = 2
+        # # C_MULTS = [128, 128, 256, 256] + [512] * 10
+        # C_MULTS = [i // 4 for i in [128, 128, 256, 256] + [512] * 10]
         # self.diffusion = DiffusionAttnUnet1D(
         #     global_args,
         #     io_channels=global_args.num_channels,
@@ -209,10 +209,50 @@ class DemoCallback(pl.Callback):
     # def on_train_epoch_end(self, trainer, module):
     def on_train_batch_end(self, trainer, module, outputs, batch, batch_idx):
 
+
+        def sonify(fakes):
+            embeddings = fakes
+
+            # decode here
+            fakes = self.encodec_processor.decode_embeddings(embeddings)
+
+            # Put the demos together
+            fakes = rearrange(fakes, "b d n -> d (b n)")
+            fakes = fakes / torch.max(torch.abs(fakes) + 1e-8)
+            return fakes
+
+        log_dict = {}
+                
+        if self.last_demo_step == -1:
+
+            true_embeddings = batch[0].half()[:self.num_demos]
+
+            codes=self.encodec_processor.quantize_embeddings(true_embeddings)
+
+            true_embeddings = self.encodec_processor.codes_to_embeddings(codes)
+
+            truths=sonify(true_embeddings)
+
+            filename = f"artefacts/audio_demo/true_samples_{trainer.global_step:08}.wav"
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
+            truths = truths.clamp(-1, 1).mul(32767).to(torch.int16).cpu()
+            torchaudio.save(filename, truths, self.sample_rate)
+
+            log_dict[f"truth"] = wandb.Audio(
+                filename, sample_rate=self.sample_rate, caption=f"true samples"
+            )
+
+            log_dict[f"true_melspec_left"] = wandb.Image(audio_spectrogram_image(truths))
+
+            trainer.logger.experiment.log(log_dict, step=trainer.global_step)
+
         if (
             trainer.global_step - 1
         ) % self.demo_every != 0 or self.last_demo_step == trainer.global_step:
             return
+
+       
+
 
         self.last_demo_step = trainer.global_step
 
@@ -222,47 +262,8 @@ class DemoCallback(pl.Callback):
 
         fakes = sample(module.diffusion_ema, noise, self.demo_steps, 0)
 
-        fakes = fakes.detach().half()
-
-        embeddings = fakes[:,:-1,:]
-        predicted_rms = fakes[:,-1:,:]
-        
-        # decode here
-        fakes = [
-            self.encodec_processor.decode_embeddings(embeddings[i][None, ...])[0]
-            for i in range(embeddings.shape[0])
-        ]
-
-        fakes = torch.stack(fakes)
-
-        # compute rms 
-        n_frames = embeddings[0][0].shape[-1]
-
-        # get wav frames
-        wav_frames = fakes.mean(dim=1,keepdim=True).reshape(fakes.shape[0], 1 ,n_frames,-1)
-
-        # compute rms per frames
-        rms = torch.sqrt(torch.mean(wav_frames**2, dim=-1))
-
-        # compute gain
-        gain = predicted_rms / (rms+1e-8)
-
-        # print(gain.shape, fakes.shape)
-        # print(rms.shape, predicted_rms.shape)
-
-        # upscale to shape of fakes with linear interpolation
-        gain = torch.nn.functional.interpolate(gain, size=fakes.shape[-1], mode='linear')
-
-        # print(gain.shape, fakes.shape)
-
-        # apply gain
-        #fakes = fakes * gain
-        
-        # Put the demos together
-        fakes = rearrange(fakes, "b d n -> d (b n)")
-
-        fakes = fakes / torch.max(torch.abs(fakes) + 1e-8)
-
+        fakes = sonify(fakes.detach().half())
+       
         log_dict = {}
 
         filename = f"artefacts/audio_demo/demo_{trainer.global_step:08}.wav"
@@ -309,8 +310,7 @@ def main():
             fp = self.data[idx]["filepath"]
             embedding = self.data[idx]["encoded_frames_embeddings"][0]
             rms = self.data[idx]["frame_rms"]
-            joint_embedding = torch.cat([embedding, rms], dim=0)
-            return (joint_embedding, fp)
+            return (embedding, fp)
 
     train_set = DrumfusionDataset()
 

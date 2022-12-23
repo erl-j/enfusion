@@ -49,7 +49,6 @@ class DrumfusionDataset(torch.utils.data.Dataset):
             images[:, None, ...], size=(128, 150), mode="bilinear"
         )[:, 0, ...]
         
-
         # collapse batch and time dimension
         reshaped_images = images.permute([0,2,1]).reshape(-1,images.shape[1])
         rescaled_images = torch.tensor(self.scaler.inverse_transform(reshaped_images))

@@ -74,6 +74,15 @@ class EncodecProcessor(torch.nn.Module):
         reconstructed_wav = self.model.decoder(embeddings)
         return reconstructed_wav
 
+    def quantize_embeddings(self, embeddings):
+        codes = self.model.quantizer.encode(embeddings, self.model.frame_rate, self.model.bandwidth)
+        codes = codes.transpose(0, 1)
+        return codes
+
+    def codes_to_embeddings(self, codes):
+        codes = codes.transpose(0, 1)
+        emb = self.model.quantizer.decode(codes)
+        return emb
     # def crop(self, encoded_frames, n):
     #     for frame_index in range(len(encoded_frames)):
     #         encoded_frames[frame_index] = list(encoded_frames[frame_index])

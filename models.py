@@ -23,27 +23,28 @@ class RecurrentScore(torch.nn.Module):
 
         self.timestep_embed = FourierFeatures(1, 16)
 
+        self.hidden_size = 320
+
         # MLP with skip connection
         self.mlp = torch.nn.Sequential(
-            torch.nn.Linear(in_channels+16, in_channels),
+            torch.nn.Linear(in_channels+16, self.hidden_size),
             torch.nn.ReLU(),
-            torch.nn.Linear(in_channels, in_channels),
+            torch.nn.Linear(self.hidden_size, self.hidden_size),
             torch.nn.ReLU(),
         )
 
-        # Bidirectional GRU model with a 2 layer skip MLP before and after the GRU
         self.gru = torch.nn.GRU(
-            input_size=in_channels,
-            hidden_size=in_channels,
-            num_layers=1,
+            input_size=self.hidden_size,
+            hidden_size=self.hidden_size,
+            num_layers=2,
             batch_first=True,
             bidirectional=True,
         )
         
         self.out_mlp=torch.nn.Sequential(
-            torch.nn.Linear(in_channels*2, in_channels),
+            torch.nn.Linear(self.hidden_size*2, self.hidden_size),
             torch.nn.ReLU(),
-            torch.nn.Linear(in_channels, in_channels),
+            torch.nn.Linear(self.hidden_size, in_channels),
         )        
 
     def forward(self, x,t):        
