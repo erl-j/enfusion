@@ -6,6 +6,21 @@ import math
 def expand_to_planes(input, shape):
     return input[..., None].repeat([1, 1, shape[2]])
 
+
+class TextReducer(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super().__init__()
+        self.mlp = nn.Sequential(
+            nn.Linear(in_channels, out_channels),
+            nn.ReLU(),
+            nn.Linear(out_channels, out_channels),
+            nn.ReLU(),
+        )
+
+    def forward(self, x):
+        return self.mlp(x)
+      
+
 class FourierFeatures(nn.Module):
     def __init__(self, in_features, out_features, std=1.):
         super().__init__()
@@ -25,9 +40,14 @@ class RecurrentScore(torch.nn.Module):
 
         self.hidden_size = 256
 
+        self.text_embedding_size=512
+        self.reduced_text_embedding_size=16
+
+        self.text_reducer = TextReducer(self.text_embedding_size, self.reduced_text_embedding_size)
+
         # MLP with skip connection
         self.mlp = torch.nn.Sequential(
-            torch.nn.Linear(in_channels+16, self.hidden_size),
+            torch.nn.Linear(in_channels+16+self.reduced_text_embedding_size, self.hidden_size),
             torch.nn.ReLU(),
             torch.nn.Linear(self.hidden_size, self.hidden_size),
             torch.nn.ReLU(),
@@ -47,11 +67,16 @@ class RecurrentScore(torch.nn.Module):
             torch.nn.Linear(self.hidden_size, in_channels),
         )        
 
-    def forward(self, x,t):        
+    def forward(self, x,t,text_embedding=None):  
 
         te = expand_to_planes(self.timestep_embed(t[:, None]), x.shape)
         
         x = torch.cat([x, te], dim=1)
+
+        if text_embedding is not None:
+            reduced_text_embedding = self.text_reducer(text_embedding)
+            reduced_text_embedding = reduced_text_embedding[:,:,None].repeat(1,1,x.shape[2])
+            x = torch.cat([x, reduced_text_embedding], dim=1)
 
         x = x.permute(0, 2, 1)
 

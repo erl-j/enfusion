@@ -23,6 +23,7 @@ from einops import rearrange
 import torchaudio
 import wandb
 
+import numpy as np
 from dataset.dataset import SampleDataset
 
 from audio_diffusion.models import DiffusionAttnUnet1D
@@ -57,7 +58,7 @@ def alpha_sigma_to_t(alpha, sigma):
 
 
 @torch.no_grad()
-def sample(model, x, steps, eta):
+def sample(model, x,text_embeddings,steps, eta):
     """Draws samples from a model given starting noise."""
     ts = x.new_ones([x.shape[0]])
 
@@ -73,7 +74,7 @@ def sample(model, x, steps, eta):
 
         # Get the model output (v, the predicted velocity)
         with torch.cuda.amp.autocast():
-            v = model(x, ts * t[i]).float()
+            v = model(x, ts * t[i],text_embeddings).float()
 
         # Predict the noise and the denoised image
         pred = x * alphas[i] - v * sigmas[i]
@@ -134,6 +135,7 @@ class DiffusionUncond(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         reals = batch[0]
+        text_embedding=batch[1]
 
         # Draw uniformly distributed continuous timesteps
         t = self.rng.draw(reals.shape[0])[:, 0].to(self.device)
@@ -154,7 +156,7 @@ class DiffusionUncond(pl.LightningModule):
         log_dict = {}
 
         with torch.cuda.amp.autocast():
-            v = self.diffusion(noised_reals, t)
+            v = self.diffusion(noised_reals, t, text_embedding)
 
             if self.global_args.loss == "mssl":
                 v_embed = v[:,:-1,:]
@@ -251,8 +253,6 @@ class DemoCallback(pl.Callback):
         ) % self.demo_every != 0 or self.last_demo_step == trainer.global_step:
             return
 
-       
-
 
         self.last_demo_step = trainer.global_step
 
@@ -260,7 +260,9 @@ class DemoCallback(pl.Callback):
             module.device
         )
 
-        fakes = sample(module.diffusion_ema, noise, self.demo_steps, 0)
+        text_embeddings = batch[1].half()[:self.num_demos]
+
+        fakes = sample(module.diffusion_ema, noise, text_embeddings,self.demo_steps, 0)
 
         fakes = sonify(fakes.detach().half())
        
@@ -310,7 +312,9 @@ def main():
             fp = self.data[idx]["filepath"]
             embedding = self.data[idx]["encoded_frames_embeddings"][0]
             rms = self.data[idx]["frame_rms"]
-            return (embedding, fp)
+            text_embeddings = self.data[idx]["text_embeddings"]
+            text_embedding = text_embeddings[np.random.randint(0, len(text_embeddings))]
+            return (embedding, text_embedding)
 
     train_set = DrumfusionDataset()
 
