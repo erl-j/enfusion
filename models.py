@@ -23,7 +23,7 @@ class RecurrentScore(torch.nn.Module):
 
         self.timestep_embed = FourierFeatures(1, 16)
 
-        self.hidden_size = 320
+        self.hidden_size = 256
 
         # MLP with skip connection
         self.mlp = torch.nn.Sequential(
