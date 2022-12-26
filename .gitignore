@@ -5,6 +5,7 @@ wandb/
 dd-finetune/
 audio_demo/
 KillerBee samples/
+v-diffusion-pytorch/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
