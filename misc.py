@@ -1,7 +1,7 @@
-# credit to @caillonantoine from https://github.com/acids-ircam/ddsp_pytorch/blob/master/ddsp/core.py
+
 import torch
 
-
+# credit to @caillonantoine from https://github.com/acids-ircam/ddsp_pytorch/blob/master/ddsp/core.py
 def multiscale_fft(signal, scales, overlap):
     stfts = []
     for s in scales:
