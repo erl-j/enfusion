@@ -37,6 +37,7 @@ from encodec_processor import (
 import pandas as pd
 from misc import multiscale_loss
 from models import RecurrentScore
+from data import EnfusionDataset
 
 # Define the noise schedule and sampling loop
 def get_alphas_sigmas(t):
@@ -134,8 +135,8 @@ class DiffusionUncond(pl.LightningModule):
         return optim.Adam([*self.diffusion.parameters()], lr=self.global_args.lr)
 
     def training_step(self, batch, batch_idx):
-        reals = batch[0]
-        text_embedding=batch[1]
+        reals = batch["audio_embedding"]
+        text_embedding=batch["text_embedding"]
 
         # Draw uniformly distributed continuous timesteps
         t = self.rng.draw(reals.shape[0])[:, 0].to(self.device)
@@ -227,7 +228,7 @@ class DemoCallback(pl.Callback):
                 
         if self.last_demo_step == -1:
 
-            true_embeddings = batch[0].half()[:self.num_demos]
+            true_embeddings = batch["audio_embedding"].half()[:self.num_demos]
 
             codes=self.encodec_processor.quantize_embeddings(true_embeddings)
 
@@ -260,7 +261,7 @@ class DemoCallback(pl.Callback):
             module.device
         )
 
-        text_embeddings = batch[1].half()[:self.num_demos]
+        text_embeddings = batch["text_embedding"].half()[:self.num_demos]
 
         fakes = sample(module.diffusion_ema, noise, text_embeddings,self.demo_steps, 0)
 
@@ -302,21 +303,7 @@ def main():
 
     encodec_processor = EncodecProcessor(SAMPLE_RATE)
 
-    class DrumfusionDataset(torch.utils.data.Dataset):
-        def __init__(self):
-            self.data = torch.load("artefacts/kb_data_with_text_embeddings.pt")
-        def __len__(self):
-            return len(self.data)
-
-        def __getitem__(self, idx):
-            fp = self.data[idx]["filepath"]
-            embedding = self.data[idx]["encoded_frames_embeddings"][0]
-            rms = self.data[idx]["frame_rms"]
-            text_embeddings = self.data[idx]["text_embeddings"]
-            text_embedding = text_embeddings[np.random.randint(0, len(text_embeddings))]
-            return (embedding, text_embedding)
-
-    train_set = DrumfusionDataset()
+    train_set = EnfusionDataset(args.dataset_path)
 
     # train_set = SampleDataset([args.training_dir], args)
     train_dl = data.DataLoader(
@@ -328,11 +315,6 @@ def main():
         pin_memory=True,
     )
 
-    print(train_set[0])
-    print(train_set[0][0].shape)
-    batch = next(iter(train_dl))
-    print(batch[0])
-    print(batch[0].shape)
 
     wandb_logger = pl.loggers.WandbLogger(
         project=args.name, log_model="all" if args.save_wandb == "all" else None
