@@ -6,6 +6,7 @@ dd-finetune/
 audio_demo/
 KillerBee samples/
 v-diffusion-pytorch/
+data_scrape/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
