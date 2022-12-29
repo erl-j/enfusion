@@ -51,7 +51,7 @@ class RecurrentScore(torch.nn.Module):
             torch.nn.ReLU(),
             torch.nn.Linear(self.hidden_size, self.hidden_size),
             torch.nn.ReLU(),
-            torch.nn.Linear(self.hidden_size, in_channels),
+            torch.nn.Linear(self.hidden_size, self.hidden_size),
             torch.nn.ReLU(),
         )
 
