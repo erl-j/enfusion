@@ -51,18 +51,22 @@ class RecurrentScore(torch.nn.Module):
             torch.nn.ReLU(),
             torch.nn.Linear(self.hidden_size, self.hidden_size),
             torch.nn.ReLU(),
+            torch.nn.Linear(self.hidden_size, in_channels),
+            torch.nn.ReLU(),
         )
 
         self.gru = torch.nn.GRU(
             input_size=self.hidden_size,
             hidden_size=self.hidden_size,
-            num_layers=2,
+            num_layers=3,
             batch_first=True,
             bidirectional=True,
         )
         
         self.out_mlp=torch.nn.Sequential(
             torch.nn.Linear(self.hidden_size*2, self.hidden_size),
+            torch.nn.ReLU(),
+            torch.nn.Linear(self.hidden_size, self.hidden_size),
             torch.nn.ReLU(),
             torch.nn.Linear(self.hidden_size, in_channels),
         )        
@@ -88,76 +92,6 @@ class RecurrentScore(torch.nn.Module):
 
         # Skip MLP
         x = self.out_mlp(x)
-
-        x = x.permute(0, 2, 1)
-
-        return x
-
-
-
-class RecurrentScore2(torch.nn.Module):
-    def __init__(self,in_channels) -> None:
-        super().__init__()
-
-        self.timestep_embed = FourierFeatures(1, 16)
-        
-        self.in_channels = in_channels
-
-        self.hidden_size = in_channels + 16
-
-        # MLP with skip connection
-        self.mlp = torch.nn.Sequential(
-            torch.nn.Linear(in_channels+16, self.hidden_size),
-            torch.nn.ReLU(),
-            torch.nn.Linear(self.hidden_size, self.hidden_size),
-        )
-
-        self.pre_gru_act = torch.nn.ReLU()
-
-        # Bidirectional GRU model with a 2 layer skip MLP before and after the GRU
-        self.gru = torch.nn.GRU(
-            input_size=self.hidden_size,
-            hidden_size=self.hidden_size,
-            num_layers=1,
-            batch_first=True,
-            bidirectional=True,
-        )
-
-        self.post_gru_act = torch.nn.ReLU()
-        
-        self.out_mlp=torch.nn.Sequential(
-            torch.nn.Linear(self.hidden_size, self.hidden_size),
-            torch.nn.ReLU(),
-            torch.nn.Linear(self.hidden_size, self.in_channels),
-        )
-
-        self.pre_out_act = torch.nn.ReLU()
-        
-    def forward(self, x,t):        
-
-        te = expand_to_planes(self.timestep_embed(t[:, None]), x.shape)
-        
-        x = torch.cat([x, te], dim=1)
-
-        x = x.permute(0, 2, 1) 
-
-        # Skip MLP
-        x = self.mlp(x) + x
-
-        x = self.pre_gru_act(x)
-
-        # GRU
-        gru_out, _ = self.gru(x)
-
-        # fold the bidirectional GRU output and add
-        gru_out = gru_out[:,:, :self.hidden_size] + gru_out[:, :,self.hidden_size:]
-
-        x = self.post_gru_act(gru_out + x )
-
-        # Skip MLP
-        x = self.out_mlp(x) + x[:, :, :self.in_channels]
-
-        x = self.pre_out_act(x)
 
         x = x.permute(0, 2, 1)
 

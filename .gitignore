@@ -7,6 +7,7 @@ audio_demo/
 KillerBee samples/
 v-diffusion-pytorch/
 data_scrape/
+enfusion/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

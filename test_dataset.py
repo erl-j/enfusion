@@ -1,17 +1,17 @@
 #%%
-from dataset import ALVDataset, EnfusionDataset
+from data import ALVDataset, EnfusionDataset
 
 
-ds = EnfusionDataset("artefacts/killerbee_dataset.pt")
+#ds = EnfusionDataset("artefacts/killerbee_dataset.pt")
 
 
 # print(len(ds))
 
 # print(ds[0])
-# dataset = ALVDataset("../synth_text_dataset")
+dataset = ALVDataset("../synth_text_dataset")
 
 
-# dataset.save("artefacts/alv_dataset.pt")
+dataset.save("artefacts/alv_full_dataset.pt")
 
 # %%
 

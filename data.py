@@ -25,7 +25,7 @@ class EnfusionDataset(torch.utils.data.Dataset):
 
 class ALVDataset(EnfusionDataset):
     def __init__(self,dataset_path) -> None:
-        DURATION=1
+        DURATION=5
         SAMPLE_RATE = 48000
         self.metadata = json.load(open(f"{dataset_path}/patch_metadata.json"))
 
@@ -42,27 +42,24 @@ class ALVDataset(EnfusionDataset):
             text_embeddings = [text_embedder.embed_text(caption) for caption in captions]
 
             timestamp = pm["timestamp"]
-            audio_path = f"{dataset_path}/cropped_audio/{timestamp}/6.wav"
-            wav, sr = torchaudio.load(audio_path)
 
-            # crop/pad to 1 second
-            if wav.shape[1] > DURATION*sr:
-                wav = wav[:, :DURATION*sr]
-            if wav.shape[1] < DURATION*sr:
-                wav = torch.nn.functional.pad(wav, (0, DURATION*sr - wav.shape[1]))
-            # resample
-            wav = torchaudio.functional.resample(wav, sr, SAMPLE_RATE)
-            # normalize
-            wav = wav / torch.max(torch.abs(wav) + 1e-8)
-            # encode
-            encoded_frames = encodec_processor.encode(wav, SAMPLE_RATE)
-            n_frames = encoded_frames[0][0].shape[-1]
-            # get wav frames
-            wav_frames = wav.reshape(1, n_frames ,-1)
-            # compute rms per frames
-            #rms = torch.sqrt(torch.mean(wav_frames**2, dim=-1))
-            embeddings = encodec_processor.encode_wo_quantization(wav, SAMPLE_RATE)[0]
-            self.data.append({"audio_embeddings":[embeddings], "text_embeddings":text_embeddings, "metadata":pm, "texts":captions})
+            embeddings=[]
+            for j in range(0,16):
+                audio_path = f"{dataset_path}/cropped_audio/{timestamp}/6.wav"
+                wav, sr = torchaudio.load(audio_path)
+                # crop/pad to duration
+                if wav.shape[1] > DURATION*sr:
+                    wav = wav[:, :DURATION*sr]
+                if wav.shape[1] < DURATION*sr:
+                    wav = torch.nn.functional.pad(wav, (0, DURATION*sr - wav.shape[1]))
+                # resample
+                wav = torchaudio.functional.resample(wav, sr, SAMPLE_RATE)
+                # normalize
+                wav = wav / torch.max(torch.abs(wav) + 1e-8)
+                # encode
+                embeddings.append(encodec_processor.encode_wo_quantization(wav, SAMPLE_RATE)[0])
+
+            self.data.append({"audio_embeddings":embeddings, "text_embeddings":text_embeddings, "metadata":pm, "texts":captions})
 
 
     def get_augmented_text_attributes(self,pm):
