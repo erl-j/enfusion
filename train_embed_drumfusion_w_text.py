@@ -37,7 +37,7 @@ from encodec_processor import (
 import pandas as pd
 from misc import multiscale_loss
 from models import RecurrentScore
-from data import EnfusionDataset
+from data import EnfusionDataset, ALVDataset
 
 # Define the noise schedule and sampling loop
 def get_alphas_sigmas(t):
@@ -123,7 +123,7 @@ class DiffusionUncond(pl.LightningModule):
         #     depth=DEPTH,
         #     c_mults=C_MULTS,
         # )
-        self.diffusion = RecurrentScore(in_channels=global_args.num_channels)
+        self.diffusion = RecurrentScore(n_in_channels=global_args.n_audio_embedding_channels,n_conditioning_channels=global_args.n_conditioning_channels)
         self.diffusion_ema = deepcopy(self.diffusion)
         self.rng = torch.quasirandom.SobolEngine(
             1, scramble=True, seed=global_args.seed
@@ -200,10 +200,10 @@ class DemoCallback(pl.Callback):
         super().__init__()
         self.demo_every = global_args.demo_every
         self.num_demos = global_args.num_demos
-        self.demo_samples = global_args.sample_size
+        self.demo_samples = global_args.n_frames
         self.demo_steps = global_args.demo_steps
         self.sample_rate = global_args.sample_rate
-        self.num_channels = global_args.num_channels
+        self.num_channels = global_args.n_audio_embedding_channels
         self.last_demo_step = -1
         self.encodec_processor = encodec_processor
 
@@ -211,7 +211,6 @@ class DemoCallback(pl.Callback):
     @torch.no_grad()
     # def on_train_epoch_end(self, trainer, module):
     def on_train_batch_end(self, trainer, module, outputs, batch, batch_idx):
-
 
         def sonify(fakes):
             embeddings = fakes
@@ -303,9 +302,30 @@ def main():
 
     encodec_processor = EncodecProcessor(SAMPLE_RATE)
 
-    train_set = EnfusionDataset(args.dataset_path)
+    train_set = ALVDataset(preprocessed_path=args.dataset_path)
+    #train_set = EnfusionDataset(args.dataset_path)
 
-    # train_set = SampleDataset([args.training_dir], args)
+    example = train_set[0]
+
+    print(example["audio_embedding"].shape)
+
+    n_frames = example["audio_embedding"].shape[-1]
+    n_seconds = n_frames/args.encodec_frames_per_second
+    n_conditioning_channels = example["text_embedding"].shape[-1]
+
+    batch_size = int(args.batch_seconds // n_seconds)
+    n_audio_embedding_channels = example["audio_embedding"].shape[0]
+
+    print(f"n_seconds: {n_seconds}")
+    print(f"n_frames: {n_frames}")
+    print(f"batch_size: {batch_size}")
+    print(f"n_audio_embedding_channels: {n_audio_embedding_channels}")
+
+    args.batch_size = batch_size
+    args.n_frames = n_frames
+    args.n_conditioning_channels = n_conditioning_channels
+    args.n_audio_embedding_channels = n_audio_embedding_channels
+
     train_dl = data.DataLoader(
         train_set,
         args.batch_size,
@@ -314,17 +334,21 @@ def main():
         persistent_workers=True,
         pin_memory=True,
     )
-
+    print(f"training dataloader")
 
     wandb_logger = pl.loggers.WandbLogger(
         project=args.name, log_model="all" if args.save_wandb == "all" else None
     )
+
+    print(f"wandb_logger")
 
     exc_callback = ExceptionCallback()
     ckpt_callback = pl.callbacks.ModelCheckpoint(
         every_n_train_steps=args.checkpoint_every, save_top_k=-1, dirpath=save_path
     )
     demo_callback = DemoCallback(args, encodec_processor)
+
+    print(f"creating diffusion model")
 
     diffusion_model = DiffusionUncond(args,encodec_processor=encodec_processor)
 
@@ -343,6 +367,8 @@ def main():
         log_every_n_steps=1,
         max_epochs=10000000,
     )
+
+    print(f"training model")
 
     diffusion_trainer.fit(diffusion_model, train_dl, ckpt_path=args.ckpt_path)
 

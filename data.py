@@ -24,42 +24,45 @@ class EnfusionDataset(torch.utils.data.Dataset):
         return {"audio_embedding":audio_embedding, "text_embedding":text_embedding}
 
 class ALVDataset(EnfusionDataset):
-    def __init__(self,dataset_path) -> None:
-        DURATION=5
-        SAMPLE_RATE = 48000
-        self.metadata = json.load(open(f"{dataset_path}/patch_metadata.json"))
+    def __init__(self,dataset_path=None,preprocessed_path=None) -> None:
+        if preprocessed_path is not None:
+            super().__init__(preprocessed_path)
+        else:
+            DURATION=5
+            SAMPLE_RATE = 48000
+            self.metadata = json.load(open(f"{dataset_path}/patch_metadata.json"))
 
-        encodec_processor = EncodecProcessor(SAMPLE_RATE)
-        text_embedder = TextEmbedder()
+            encodec_processor = EncodecProcessor(SAMPLE_RATE)
+            text_embedder = TextEmbedder()
 
-        self.data=[]
+            self.data=[]
 
-        for i in tqdm(range(len(self.metadata))):
+            for i in tqdm(range(len(self.metadata))):
 
-            pm = self.metadata[i]
-            captions = self.get_augmented_text_attributes(pm)
+                pm = self.metadata[i]
+                captions = self.get_augmented_text_attributes(pm)
 
-            text_embeddings = [text_embedder.embed_text(caption) for caption in captions]
+                text_embeddings = [text_embedder.embed_text(caption) for caption in captions]
 
-            timestamp = pm["timestamp"]
+                timestamp = pm["timestamp"]
 
-            embeddings=[]
-            for j in range(0,16):
-                audio_path = f"{dataset_path}/cropped_audio/{timestamp}/6.wav"
-                wav, sr = torchaudio.load(audio_path)
-                # crop/pad to duration
-                if wav.shape[1] > DURATION*sr:
-                    wav = wav[:, :DURATION*sr]
-                if wav.shape[1] < DURATION*sr:
-                    wav = torch.nn.functional.pad(wav, (0, DURATION*sr - wav.shape[1]))
-                # resample
-                wav = torchaudio.functional.resample(wav, sr, SAMPLE_RATE)
-                # normalize
-                wav = wav / torch.max(torch.abs(wav) + 1e-8)
-                # encode
-                embeddings.append(encodec_processor.encode_wo_quantization(wav, SAMPLE_RATE)[0])
+                embeddings=[]
+                for j in range(0,16):
+                    audio_path = f"{dataset_path}/cropped_audio/{timestamp}/6.wav"
+                    wav, sr = torchaudio.load(audio_path)
+                    # crop/pad to duration
+                    if wav.shape[1] > DURATION*sr:
+                        wav = wav[:, :DURATION*sr]
+                    if wav.shape[1] < DURATION*sr:
+                        wav = torch.nn.functional.pad(wav, (0, DURATION*sr - wav.shape[1]))
+                    # resample
+                    wav = torchaudio.functional.resample(wav, sr, SAMPLE_RATE)
+                    # normalize
+                    wav = wav / torch.max(torch.abs(wav) + 1e-8)
+                    # encode
+                    embeddings.append(encodec_processor.encode_wo_quantization(wav, SAMPLE_RATE)[0])
 
-            self.data.append({"audio_embeddings":embeddings, "text_embeddings":text_embeddings, "metadata":pm, "texts":captions})
+                self.data.append({"audio_embeddings":embeddings, "text_embeddings":text_embeddings, "metadata":pm, "texts":captions})
 
 
     def get_augmented_text_attributes(self,pm):
@@ -80,6 +83,13 @@ class ALVDataset(EnfusionDataset):
         # remove "NA"
         texts = [t for t in texts if t != "NA"]
         return texts
+
+    def __getitem__(self, index):
+        audio_index = 6#np.random.randint(0, len(self.data[index]["audio_embeddings"]))
+        text_index = np.random.randint(0, len(self.data[index]["text_embeddings"]))
+        audio_embedding = self.data[index]["audio_embeddings"][audio_index]
+        text_embedding =  self.data[index]["text_embeddings"][text_index]
+        return {"audio_embedding":audio_embedding, "text_embedding":text_embedding}
     
     
 # class KillerBeeDataset():
