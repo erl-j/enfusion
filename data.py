@@ -85,9 +85,11 @@ class ALVDataset(EnfusionDataset):
         return texts
 
     def __getitem__(self, index):
-        audio_index = 6#np.random.randint(0, len(self.data[index]["audio_embeddings"]))
+        # audio_index = 6#np.random.randint(0, len(self.data[index]["audio_embeddings"]))
+        # audio_embedding = self.data[index]["audio_embeddings"][audio_index]
+        audio_embedding = torch.concat(self.data[index]["audio_embeddings"], dim=-1)
+
         text_index = np.random.randint(0, len(self.data[index]["text_embeddings"]))
-        audio_embedding = self.data[index]["audio_embeddings"][audio_index]
         text_embedding =  self.data[index]["text_embeddings"][text_index]
         return {"audio_embedding":audio_embedding, "text_embedding":text_embedding}
     
