@@ -9,8 +9,6 @@ from data import ALVDataset, EnfusionDataset
 
 # print(ds[0])
 dataset = ALVDataset("../synth_text_dataset")
-
-
 dataset.save("artefacts/alv_full_dataset.pt")
 
 # %%

@@ -302,8 +302,8 @@ def main():
 
     encodec_processor = EncodecProcessor(SAMPLE_RATE)
 
-    train_set = ALVDataset(preprocessed_path=args.dataset_path)
-    #train_set = EnfusionDataset(args.dataset_path)
+    train_set = ALVDataset(preprocessed_path=args.dataset_path, filter_out_sequences=True)
+    print(f"train_set len: {len(train_set)}")
 
     example = train_set[0]
 

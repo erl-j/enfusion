@@ -24,7 +24,7 @@ class EnfusionDataset(torch.utils.data.Dataset):
         return {"audio_embedding":audio_embedding, "text_embedding":text_embedding}
 
 class ALVDataset(EnfusionDataset):
-    def __init__(self,dataset_path=None,preprocessed_path=None) -> None:
+    def __init__(self,dataset_path=None,preprocessed_path=None, filter_out_sequences=False) -> None:
         if preprocessed_path is not None:
             super().__init__(preprocessed_path)
         else:
@@ -47,8 +47,9 @@ class ALVDataset(EnfusionDataset):
                 timestamp = pm["timestamp"]
 
                 embeddings=[]
+                wavs = []
                 for j in range(0,16):
-                    audio_path = f"{dataset_path}/cropped_audio/{timestamp}/6.wav"
+                    audio_path = f"{dataset_path}/cropped_audio/{timestamp}/{j}.wav"
                     wav, sr = torchaudio.load(audio_path)
                     # crop/pad to duration
                     if wav.shape[1] > DURATION*sr:
@@ -58,13 +59,26 @@ class ALVDataset(EnfusionDataset):
                     # resample
                     wav = torchaudio.functional.resample(wav, sr, SAMPLE_RATE)
                     # normalize
-                    wav = wav / torch.max(torch.abs(wav) + 1e-8)
+                    wavs.append(wav)
                     # encode
+                # get total peak value
+                peak = torch.max(torch.abs(torch.cat(wavs, dim=-1)))
+                # normalize all channels
+                if peak > 0:
+                    wavs = [wav/(peak) for wav in wavs]
+                for wav in wavs:
                     embeddings.append(encodec_processor.encode_wo_quantization(wav, SAMPLE_RATE)[0])
 
                 self.data.append({"audio_embeddings":embeddings, "text_embeddings":text_embeddings, "metadata":pm, "texts":captions})
 
-
+        if filter_out_sequences:
+            disallowed =set(["sequence loop", "arpeggiated", "arpeggio","sequence","loop","arpeggio","rhythmic","drum loop"])
+            new_data=[]
+            for i in range(len(self.data)):
+                if not any([text.lower() in disallowed for text in self.data[i]["texts"]]):
+                    new_data.append(self.data[i])
+            self.data = new_data
+            
     def get_augmented_text_attributes(self,pm):
         text = {
             "title": [{"string": pm["title"]}],
@@ -87,7 +101,9 @@ class ALVDataset(EnfusionDataset):
     def __getitem__(self, index):
         # audio_index = 6#np.random.randint(0, len(self.data[index]["audio_embeddings"]))
         # audio_embedding = self.data[index]["audio_embeddings"][audio_index]
-        audio_embedding = torch.concat(self.data[index]["audio_embeddings"], dim=-1)
+        min_note = 2
+        max_note = 10
+        audio_embedding = torch.concat(self.data[index]["audio_embeddings"][min_note:max_note+1], dim=-1)
 
         text_index = np.random.randint(0, len(self.data[index]["text_embeddings"]))
         text_embedding =  self.data[index]["text_embeddings"][text_index]
