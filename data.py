@@ -103,11 +103,12 @@ class ALVDataset(EnfusionDataset):
         # audio_embedding = self.data[index]["audio_embeddings"][audio_index]
         min_note = 2
         max_note = 10
+        n_pitches = max_note - min_note + 1
         audio_embedding = torch.concat(self.data[index]["audio_embeddings"][min_note:max_note+1], dim=-1)
 
         text_index = np.random.randint(0, len(self.data[index]["text_embeddings"]))
         text_embedding =  self.data[index]["text_embeddings"][text_index]
-        return {"audio_embedding":audio_embedding, "text_embedding":text_embedding}
+        return {"audio_embedding":audio_embedding, "text_embedding":text_embedding, "n_pitches":1}
     
     
 # class KillerBeeDataset():

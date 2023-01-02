@@ -36,7 +36,7 @@ from encodec_processor import (
 )
 import pandas as pd
 from misc import multiscale_loss
-from models import RecurrentScore
+from models import RecurrentScore, MultiPitchRecurrentScore
 from data import EnfusionDataset, ALVDataset
 
 # Define the noise schedule and sampling loop
@@ -123,7 +123,8 @@ class DiffusionUncond(pl.LightningModule):
         #     depth=DEPTH,
         #     c_mults=C_MULTS,
         # )
-        self.diffusion = RecurrentScore(n_in_channels=global_args.n_audio_embedding_channels,n_conditioning_channels=global_args.n_conditioning_channels)
+        #self.diffusion = RecurrentScore(n_in_channels=global_args.n_audio_embedding_channels,n_conditioning_channels=global_args.n_conditioning_channels)
+        self.diffusion =  MultiPitchRecurrentScore(n_in_channels=global_args.n_audio_embedding_channels,n_conditioning_channels=global_args.n_conditioning_channels, n_pitches=global_args.n_pitches)
         self.diffusion_ema = deepcopy(self.diffusion)
         self.rng = torch.quasirandom.SobolEngine(
             1, scramble=True, seed=global_args.seed
@@ -312,6 +313,7 @@ def main():
     n_frames = example["audio_embedding"].shape[-1]
     n_seconds = n_frames/args.encodec_frames_per_second
     n_conditioning_channels = example["text_embedding"].shape[-1]
+    args.n_pitches = example["n_pitches"]
 
     batch_size = int(args.batch_seconds // n_seconds)
     n_audio_embedding_channels = example["audio_embedding"].shape[0]
@@ -356,7 +358,7 @@ def main():
     push_wandb_config(wandb_logger, args)
 
     diffusion_trainer = pl.Trainer(
-        devices=[0],
+        devices=[1],
         accelerator="gpu",
         # num_nodes = args.num_nodes,
         # strategy='ddp',
