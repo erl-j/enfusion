@@ -322,6 +322,7 @@ def main():
     print(f"n_frames: {n_frames}")
     print(f"batch_size: {batch_size}")
     print(f"n_audio_embedding_channels: {n_audio_embedding_channels}")
+    print("n_pitches: ", args.n_pitches)
 
     args.batch_size = batch_size
     args.n_frames = n_frames

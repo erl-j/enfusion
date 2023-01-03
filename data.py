@@ -108,7 +108,7 @@ class ALVDataset(EnfusionDataset):
 
         text_index = np.random.randint(0, len(self.data[index]["text_embeddings"]))
         text_embedding =  self.data[index]["text_embeddings"][text_index]
-        return {"audio_embedding":audio_embedding, "text_embedding":text_embedding, "n_pitches":1}
+        return {"audio_embedding":audio_embedding, "text_embedding":text_embedding, "n_pitches":n_pitches}
     
     
 # class KillerBeeDataset():
