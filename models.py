@@ -143,7 +143,7 @@ class MultiPitchRecurrentScore(torch.nn.Module):
         self.text_reducer = TextReducer(n_conditioning_channels, self.reduced_text_embedding_size)
 
         self.global_context_size = 64
-        self.global_context_block = Block(n_in_channels +1  + 16 + self.reduced_text_embedding_size, n_hidden_channels=self.global_context_size, n_out_channels=self.global_context_size)
+        self.global_context_block = Block(n_in_channels + 1  + 16 + self.reduced_text_embedding_size, n_hidden_channels=self.global_context_size, n_out_channels=self.global_context_size)
         self.main_block = Block(n_in_channels +1+ 16 + self.reduced_text_embedding_size + self.global_context_size, self.hidden_size, n_in_channels)
        
         
