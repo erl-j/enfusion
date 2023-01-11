@@ -50,7 +50,7 @@ model_metadata = models_metadata[MODEL]
 ## download model file
 local_path = models_metadata[MODEL]["checkpoint_path"]
 os.makedirs(os.path.dirname(local_path), exist_ok=True)
-remote_path = model_metadata["checkpoint_path"].replace("demo_assets/","https://github.com/erl-j/enfusion-weights/raw/main")
+remote_path = model_metadata["checkpoint_path"].replace("demo_assets/","https://github.com/erl-j/enfusion-weights/raw/main/")
 
 # download model file and save it locally
 if not os.path.exists(local_path):
