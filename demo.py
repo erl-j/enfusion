@@ -182,13 +182,13 @@ def sonify(fakes):
 # %%
 
 #@markdown How many audio clips to create
-batch_size =  1#@param {type:"number"}
+batch_size =  20#@param {type:"number"}
 #@markdown Number of steps (100 is a good start, more steps trades off speed for quality)
 steps = 300 #@param {type:"number"}
 #@markdown Check the box below to skip this section when running all cells
 skip_for_run_all = False #@param {type: "boolean"}
 
-text="SOFT LEAD"
+text="Hard bass"
 text_embedding = text_embedder.embed_text(text).to(device)[None,:].repeat(batch_size,1)
 encodec_processor = EncodecProcessor(48000).to(device)
 
