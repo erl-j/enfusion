@@ -3,8 +3,6 @@
 import os
 import sys
 
-sys.path.append("sample-generator")
-
 from prefigure.prefigure import get_all_args, push_wandb_config
 from contextlib import contextmanager
 from copy import deepcopy
@@ -24,11 +22,8 @@ import torchaudio
 import wandb
 
 import numpy as np
-from dataset.dataset import SampleDataset
 
-from audio_diffusion.models import DiffusionAttnUnet1D
-from audio_diffusion.utils import ema_update
-from viz.viz import audio_spectrogram_image
+from audio_diffusion_utils import ema_update, audio_spectrogram_image
 from encodec_processor import (
     EncodecProcessor,
     audio_to_encodec_scale,
@@ -123,8 +118,8 @@ class DiffusionUncond(pl.LightningModule):
         #     depth=DEPTH,
         #     c_mults=C_MULTS,
         # )
-        #self.diffusion = RecurrentScore(n_in_channels=global_args.n_audio_embedding_channels,n_conditioning_channels=global_args.n_conditioning_channels)
-        self.diffusion =  MultiPitchRecurrentScore(n_in_channels=global_args.n_audio_embedding_channels,n_conditioning_channels=global_args.n_conditioning_channels, n_pitches=global_args.n_pitches)
+        self.diffusion = RecurrentScore(n_in_channels=global_args.n_audio_embedding_channels,n_conditioning_channels=global_args.n_conditioning_channels)
+        #self.diffusion =  MultiPitchRecurrentScore(n_in_channels=global_args.n_audio_embedding_channels,n_conditioning_channels=global_args.n_conditioning_channels, n_pitches=global_args.n_pitches)
         self.diffusion_ema = deepcopy(self.diffusion)
         self.rng = torch.quasirandom.SobolEngine(
             1, scramble=True, seed=global_args.seed
@@ -303,7 +298,7 @@ def main():
 
     encodec_processor = EncodecProcessor(SAMPLE_RATE)
 
-    train_set = ALVDataset(preprocessed_path=args.dataset_path, filter_out_sequences=True)
+    train_set = ALVDataset(preprocessed_path=args.dataset_path, filter_out_sequences=True, min_note=6,max_note=6)
     print(f"train_set len: {len(train_set)}")
 
     example = train_set[0]

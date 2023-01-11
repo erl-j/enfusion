@@ -41,7 +41,6 @@ class RecurrentScore(torch.nn.Module):
 
         self.reduced_text_embedding_size=16
 
-
         self.text_reducer = TextReducer(n_conditioning_channels, self.reduced_text_embedding_size)
 
         # MLP with skip connection

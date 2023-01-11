@@ -9,11 +9,10 @@ if False:
 # %%
 import os
 # GPU 1
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # %%
 import sys
-sys.path.append('sample-generator')
 
 #@title Imports and definitions
 from prefigure.prefigure import get_all_args
@@ -26,7 +25,7 @@ from pathlib import Path
 import os, signal, sys
 import gc
 
-from diffusion import sampling
+
 import torch
 from torch import optim, nn
 from torch.nn import functional as F
@@ -36,26 +35,29 @@ from einops import rearrange
 import einops
 
 import torchaudio
-from models import RecurrentScore
+from models import RecurrentScore, MultiPitchRecurrentScore
 import numpy as np
 
 import random
 import matplotlib.pyplot as plt
 import IPython.display as ipd
-from audio_diffusion.utils import Stereo, PadCrop
+from audio_diffusion_utils import Stereo, PadCrop
 from glob import glob
+
+from sampling import sample, resample, reverse_sample
+
+from export_sfz import export_sfz
+from datetime import datetime
+
+
+from encodec_processor import EncodecProcessor
+from text_embedder import TextEmbedder
 
 
 
 device ="cuda" if torch.cuda.is_available() else "cpu"
 
-#@title Model code
-class DiffusionUncond(nn.Module):
-    def __init__(self, global_args):
-        super().__init__()
-        self.diffusion = RecurrentScore(n_in_channels=128,n_conditioning_channels=512)
-        self.diffusion_ema = deepcopy(self.diffusion)
-        self.rng = torch.quasirandom.SobolEngine(1, scramble=True)
+
 
 import matplotlib.pyplot as plt
 import IPython.display as ipd
@@ -71,25 +73,6 @@ def load_to_device(path, sr):
     audio = audio.to(device)
     return audio
 
-def get_alphas_sigmas(t):
-    """Returns the scaling factors for the clean image (alpha) and for the
-    noise (sigma), given a timestep."""
-    return torch.cos(t * math.pi / 2), torch.sin(t * math.pi / 2)
-
-def get_crash_schedule(t):
-    sigma = torch.sin(t * math.pi / 2) ** 2
-    alpha = (1 - sigma ** 2) ** 0.5
-    return alpha_sigma_to_t(alpha, sigma)
-
-def t_to_alpha_sigma(t):
-    """Returns the scaling factors for the clean image and for the noise, given
-    a timestep."""
-    return torch.cos(t * math.pi / 2), torch.sin(t * math.pi / 2)
-
-def alpha_sigma_to_t(alpha, sigma):
-    """Returns a timestep, given the scaling factors for the clean image and for
-    the noise."""
-    return torch.atan2(sigma, alpha) / math.pi * 2
 
 #@title Args
 sample_size = 65536 
@@ -104,48 +87,52 @@ args.sample_size = sample_size
 args.sample_rate = sample_rate
 args.latent_dim = latent_dim
 
+sampler_type = "v-iplms" #@param ["v-iplms", "k-heun", "k-dpmpp_2s_ancestral", "k-lms", "k-dpm-2", "k-dpm-fast", "k-dpm-adaptive"]
 
-# %% [markdown]
-# # Model settings
+text_embedder = TextEmbedder()
 
 # %% [markdown]
 # Select the model you want to sample from
 # ---
-# Model name | Description | Sample rate | Output samples
-# --- | --- | --- | ---
-# glitch-440k |Trained on clips from samples provided by [glitch.cool](https://glitch.cool) | 48000 | 65536
-# jmann-small-190k |Trained on clips from Jonathan Mann's [Song-A-Day](https://songaday.world/) project | 48000 | 65536
-# jmann-large-580k |Trained on clips from Jonathan Mann's [Song-A-Day](https://songaday.world/) project | 48000 | 131072
-# maestro-150k |Trained on piano clips from the [MAESTRO](https://magenta.tensorflow.org/datasets/maestro) dataset | 16000 | 65536
-# unlocked-250k |Trained on clips from the [Unlocked Recordings](https://archive.org/details/unlockedrecordings) dataset | 16000 | 65536
-# honk-140k |Trained on recordings of the Canada Goose from [xeno-canto](https://xeno-canto.org/) | 16000 | 65536
+# Model name | Description |
+# --- | --- |
+# multipitch_parallel | multi-pitch, parallel
+# multipitch_sequential | multi-pitch, sequential
+# single_pitch | single pitch
 # 
 
-# %%
+#%%
+models_metadata = {
+  "multipitch_parallel": {"checkpoint_path":"demo_assets/multiplenotes/parallel/epoch=4210-step=400000.ckpt", "clip_s":5, "n_pitches":9},
+  "multipitch_sequential": {"checkpoint_path":"demo_assets/multiplenotes/sequential/epoch=2105-step=200000.ckpt", "clip_s":5, "n_pitches":9},
+  "single_pitch": {"checkpoint_path":"demo_assets/single_note/epoch=6363-step=70000.ckpt", "clip_s":5, "n_pitches":1},
+}
 
-from urllib.parse import urlparse
-import hashlib
-import k_diffusion as K
+MODEL = "single_pitch"
 
+if MODEL == "multipitch_parallel":
+    denoising_model= MultiPitchRecurrentScore(n_in_channels=128,n_conditioning_channels=512, n_pitches=models_metadata[MODEL]["n_pitches"])
+else:
+    denoising_model= RecurrentScore(n_in_channels=128,n_conditioning_channels=512)
 
-#custom_ckpt_path = 'dd-finetune/13mcuklp/checkpoints/epoch=17777-step=160000.ckpt'#@param {type: 'string'}
-#custom_ckpt_path = 'enfusion/2bvsqmtu/checkpoints/epoch=43333-step=130000.ckpt'
+#@title Model code
+class DiffusionModel(nn.Module):
+    def __init__(self, global_args , denoising_model=None):
+        super().__init__()
+        self.diffusion = denoising_model
+        self.diffusion_ema = deepcopy(self.diffusion)
+        self.rng = torch.quasirandom.SobolEngine(1, scramble=True)
 
+model_metadata = models_metadata[MODEL]
 
-custom_ckpt_path = 'enfusion/1qb057gd/checkpoints/epoch=1684-step=160000.ckpt'
+print(torch.load(model_metadata["checkpoint_path"],map_location=torch.device(device)))
 
-encodec_frame_rate = 150
-clip_s = 5
-sample_size = 750
-n_pitches = 9
-
-encodec_channels = 128
-
-ckpt_path = custom_ckpt_path
+ENCODEC_FRAME_RATE = 150
+ENCODEC_CHANELS = 128
 
 print("Creating the model...")
-model = DiffusionUncond(args)
-state_dict=torch.load(ckpt_path,map_location=torch.device(device))["state_dict"]
+model = DiffusionModel(args, denoising_model=denoising_model)
+state_dict=torch.load(model_metadata["checkpoint_path"],map_location=torch.device(device))["state_dict"]
 
 print(state_dict.keys())
 model.load_state_dict(state_dict, strict=False)
@@ -155,11 +142,21 @@ print("Model created")
 
 # # Remove non-EMA
 del model.diffusion
-
 model_fn = model.diffusion_ema
 
+def midi_to_hz(note):
+    a = 440 #frequency of A (coomon value is 440Hz)
+    return (a / 32) * (2 ** ((note - 9) / 12))
 
+def sonify(fakes):
+        embeddings = fakes
+        # decode here
+        fakes = encodec_processor.decode_embeddings(embeddings)
 
+        # Put the demos together
+        fakes = rearrange(fakes, "b d n -> d (b n)")
+        fakes = fakes / torch.max(torch.abs(fakes) + 1e-8)
+        return fakes
 
 # %% [markdown]
 # Select the sampler you want to use
@@ -176,112 +173,6 @@ model_fn = model.diffusion_ema
 
 # %%
 #@title Sampler options
-sampler_type = "v-iplms" #@param ["v-iplms", "k-heun", "k-dpmpp_2s_ancestral", "k-lms", "k-dpm-2", "k-dpm-fast", "k-dpm-adaptive"]
-
-#@markdown ---
-#@markdown **K-diffusion settings (advanced)**
-sigma_min = 0.0001 #@param {type: "number"}
-sigma_max = 1 #@param {type: "number"}
-rho=7. #@param {type: "number"}
-#@markdown k-dpm-adaptive settings
-rtol = 0.01 #@param {type: "number"}
-atol = 0.01 #@param {type: "number"}
-
-def sample(in_model_fn,noise,text_embedding,steps=100, sampler_type="v-iplms", noise_level = 1.0):
-  def model_fn(x,t):
-    return in_model_fn(x,t, text_embedding)
-
-  #Check for k-diffusion
-  if sampler_type.startswith('k-'):
-    denoiser = K.external.VDenoiser(model_fn)
-    sigmas = K.sampling.get_sigmas_karras(steps, sigma_min, sigma_max, rho, device=device)
-
-  if sampler_type == "v-iplms":
-    t = torch.linspace(1, 0, steps + 1, device=device)[:-1]
-    step_list = get_crash_schedule(t)
-
-    return sampling.iplms_sample(model_fn, noise, step_list, {})
-
-  elif sampler_type == "k-heun":
-    return K.sampling.sample_heun(denoiser, noise, sigmas, disable=False)
-  elif sampler_type == "k-lms":
-    return K.sampling.sample_lms(denoiser, noise, sigmas, disable=False)
-  elif sampler_type == "k-dpmpp_2s_ancestral":
-    return K.sampling.sample_dpmpp_2s_ancestral(denoiser, noise, sigmas, disable=False)
-  elif sampler_type == "k-dpm-2":
-    return K.sampling.sample_dpm_2(denoiser, noise, sigmas, disable=False)
-  elif sampler_type == "k-dpm-fast":
-    return K.sampling.sample_dpm_fast(denoiser, noise, sigma_min, sigma_max, steps, disable=False)
-  elif sampler_type == "k-dpm-adaptive":
-    return K.sampling.sample_dpm_adaptive(denoiser, noise, sigma_min, sigma_max, rtol=rtol, atol=atol, disable=False)
-
-def resample(in_model_fn, audio, text_embedding,steps=100, sampler_type="v-iplms", noise_level = 1.0):
-  def model_fn(x,t):
-    return in_model_fn(x,t, text_embedding)
-  #Noise the input
-  if sampler_type == "v-iplms":
-    t = torch.linspace(0, 1, steps + 1, device=device)
-    step_list = get_crash_schedule(t)
-    step_list = step_list[step_list < noise_level]
-
-    alpha, sigma = t_to_alpha_sigma(step_list[-1])
-    noised = torch.randn([batch_size, 2, effective_length], device='cuda')
-    noised = audio * alpha + noised * sigma
-
-  elif sampler_type.startswith("k-"):
-    denoiser = K.external.VDenoiser(model_fn)
-    noised = audio + torch.randn_like(audio) * noise_level
-    sigmas = K.sampling.get_sigmas_karras(steps, sigma_min, noise_level, rho, device=device)
-
-  # Denoise
-  if sampler_type == "v-iplms":
-    return sampling.iplms_sample(model_fn, noised, step_list.flip(0)[:-1], {})
-
-  elif sampler_type == "k-heun":
-    return K.sampling.sample_heun(denoiser, noised, sigmas, disable=False)
-
-  elif sampler_type == "k-dpmpp_2s_ancestral":
-    return K.sampling.sample_dpmpp_2s_ancestral(denoiser, noised, sigmas, disable=False)
-
-  elif sampler_type == "k-lms":
-    return K.sampling.sample_lms(denoiser, noised, sigmas, disable=False)
-
-  elif sampler_type == "k-dpm-2":
-    return K.sampling.sample_dpm_2(denoiser, noised, sigmas, s_noise=0., disable=False)
-
-  elif sampler_type == "k-dpm-fast":
-    return K.sampling.sample_dpm_fast(denoiser, noised, sigma_min, noise_level, steps, disable=False)
-
-  elif sampler_type == "k-dpm-adaptive":
-    return K.sampling.sample_dpm_adaptive(denoiser, noised, sigma_min, noise_level, rtol=rtol, atol=atol, disable=False)
-
-def reverse_sample(in_model_fn, audio, text_embedding,steps=100, sampler_type="v-iplms", noise_level = 1.0):
-  def model_fn(x,t):
-    return in_model_fn(x,t, text_embedding)
-  if sampler_type == "v-iplms":
-    t = torch.linspace(0, 1, steps + 1, device=device)
-    step_list = get_crash_schedule(t)
-
-    return sampling.iplms_sample(model_fn, audio, step_list, {}, is_reverse=True)
-
-  elif sampler_type.startswith("k-"):
-    denoiser = K.external.VDenoiser(model_fn)
-    sigmas = K.sampling.get_sigmas_karras(steps, sigma_min, noise_level, rho, device=device)
-
-  # Denoise
-  if sampler_type == "k-heun":
-    return K.sampling.sample_heun(denoiser, audio, sigmas.flip(0)[:-1], disable=False)
-  elif sampler_type == "k-lms":
-    return K.sampling.sample_lms(denoiser, audio, sigmas.flip(0)[:-1], disable=False)
-  elif sampler_type == "k-dpmpp_2s_ancestral":
-    return K.sampling.sample_dpmpp_2s_ancestral(denoiser, audio, sigmas.flip(0)[:-1], disable=False)
-  elif sampler_type == "k-dpm-2":
-    return K.sampling.sample_dpm_2(denoiser, audio, sigmas.flip(0)[:-1], s_noise=0., disable=False)
-  elif sampler_type == "k-dpm-fast":
-    return K.sampling.sample_dpm_fast(denoiser, audio, noise_level, sigma_min, steps, disable=False)
-
-  elif sampler_type == "k-dpm-adaptive":
-    return K.sampling.sample_dpm_adaptive(denoiser, audio, noise_level, sigma_min, rtol=rtol, atol=atol, disable=False)
 
 # %% [markdown]
 # # Generate new sounds
@@ -289,128 +180,111 @@ def reverse_sample(in_model_fn, audio, text_embedding,steps=100, sampler_type="v
 # Feeding white noise into the model to be denoised creates novel sounds in the "space" of the training data.
 
 # %%
-from encodec_processor import EncodecProcessor
-from text_embedder import TextEmbedder
+
 #@markdown How many audio clips to create
 batch_size =  1#@param {type:"number"}
-
 #@markdown Number of steps (100 is a good start, more steps trades off speed for quality)
-steps = 100 #@param {type:"number"}
+steps = 300 #@param {type:"number"}
+#@markdown Check the box below to skip this section when running all cells
+skip_for_run_all = False #@param {type: "boolean"}
+
+text="SOFT LEAD"
+text_embedding = text_embedder.embed_text(text).to(device)[None,:].repeat(batch_size,1)
+encodec_processor = EncodecProcessor(48000).to(device)
+
+if not skip_for_run_all:
+  torch.cuda.empty_cache()
+  gc.collect()
+  notes = 48 
+  noise = torch.randn([batch_size, ENCODEC_CHANELS, ENCODEC_FRAME_RATE * model_metadata["clip_s"]* model_metadata["n_pitches"] ]).to(device)
+  generated = sample(model_fn, noise, text_embedding, steps, sampler_type)
+  generated = sonify(generated)
+  generated = generated.cpu().detach()
+  generated_all = generated.clamp(-1, 1)
+  plot_and_hear(generated_all, args.sample_rate)
+else:
+  print("Skipping section, uncheck 'skip_for_run_all' to enable")
+
+EXPORT_SOUNDFONT = False
+if EXPORT_SOUNDFONT:
+  audio = generated_all
+
+  audio = torchaudio.functional.highpass_biquad(audio,args.sample_rate,15.0,Q=0.707)
+
+  plot_and_hear(audio, args.sample_rate)
+
+  notes = torch.split(einops.rearrange(audio,"c (p t) -> p c t", p = model_metadata["n_pitches"]),1,0)
+
+  min_midi_pitch = 36
+  regions = []
+  for note_idx, note in enumerate(notes):
+      midi_pitch_nr = min_midi_pitch + note_idx*6
+      regions.append({
+        "midi_pitch_nr": midi_pitch_nr,
+        "waveform": note[0].T,
+        "lokey": midi_pitch_nr-3,
+        "hikey": midi_pitch_nr+3,
+      } 
+      )
+
+  timestamp =  datetime.now().strftime("%Y%m%d_%H%M%S")
+  outpath = f"artefacts/instruments/{text}_{timestamp}/"
+
+  export_sfz(outpath,regions, args.sample_rate)
+
+#%%
+# %%
+#@title Generate new sounds from recording
+
+batch_size=3
+#@markdown Total number of steps (100 is a good start, more steps trades off speed for quality)
+steps = 100#@param {type:"number"}
+
+#@markdown How much (0-1) to re-noise the original sample. Adding more noise (a higher number) means a bigger change to the input audio
+noise_level = 0.9#@param {type:"number"}
+
+#@markdown Multiplier on the default sample length from the model, allows for longer audio clips at the expense of VRAM
+sample_length_mult = 1#@param {type:"number"}
 
 #@markdown Check the box below to skip this section when running all cells
 skip_for_run_all = False #@param {type: "boolean"}
 
-N_TIMESTEPS=encodec_frame_rate*clip_s*n_pitches
-N_CHANNELS=encodec_channels
-
-text="Organ"
-text_embedder = TextEmbedder()
+text="Hard bass"
 text_embedding = text_embedder.embed_text(text).to(device)[None,:].repeat(batch_size,1)
 encodec_processor = EncodecProcessor(48000).to(device)
 
-def sonify(fakes):
-        embeddings = fakes
-
-        # decode here
-        fakes = encodec_processor.decode_embeddings(embeddings)
-
-        # Put the demos together
-        fakes = rearrange(fakes, "b d n -> d (b n)")
-        fakes = fakes / torch.max(torch.abs(fakes) + 1e-8)
-        return fakes
 if not skip_for_run_all:
   torch.cuda.empty_cache()
   gc.collect()
 
-  # Generate random noise to sample from
-  noise = torch.randn([batch_size, N_CHANNELS, N_TIMESTEPS]).to(device)
-  generated = sample(model_fn, noise, text_embedding, steps, sampler_type)
+  hz = midi_to_hz(60)
 
+  audio_sample = torch.sin(torch.linspace(0, 2 * math.pi * hz * model_metadata["clip_s"], args.sample_rate * model_metadata["clip_s"] )).unsqueeze(0)*0.9
 
-  print(generated.shape)
+  audio_sample =audio_sample.to(device) #+ torch.randn_like(audio_sample) * noise_level
+
+  print(audio_sample.shape)
+
+  start_embedding = encodec_processor.encode_wo_quantization(audio_sample, args.sample_rate)
+
+  print(start_embedding.shape)
+
+  audio_sample_hat = encodec_processor.decode_embeddings(start_embedding)[0]
+
+  plot_and_hear(audio_sample, args.sample_rate)
+  plot_and_hear(audio_sample_hat.detach().cpu(), args.sample_rate)
+
+  start_embedding = start_embedding.repeat(batch_size,1,1)
+  
+  generated = resample(model_fn, start_embedding, text_embedding,steps, sampler_type, noise_level=noise_level)
   generated = sonify(generated)
   generated = generated.cpu().detach()
-
-  print(generated.shape)
-  # # Hard-clip the generated audio
   generated_all = generated.clamp(-1, 1)
-
-  # Put the demos together
-
   plot_and_hear(generated_all, args.sample_rate)
-  # for ix, gen_sample in enumerate(generated):
-  #   print(f'sample #{ix + 1}')
-  #   display(ipd.Audio(gen_sample.cpu(), rate=args.sample_rate))
-
-
 else:
   print("Skipping section, uncheck 'skip_for_run_all' to enable")
 
-
-# %%
-# export samples
-audio = generated_all
-
-# high pass to 15 hz
-
-
-audio = torchaudio.functional.highpass_biquad(audio,args.sample_rate,15.0,Q=0.707)
-
-plot_and_hear(audio, args.sample_rate)
-
-notes = torch.split(einops.rearrange(audio,"c (p t) -> p c t", p = n_pitches),1,0)
-
-
-#%%
-min_midi_pitch = 36
-regions = []
-for note_idx, note in enumerate(notes):
-    midi_pitch_nr = min_midi_pitch + note_idx*6
-    regions.append({
-      "midi_pitch_nr": midi_pitch_nr,
-      "waveform": note[0].T,
-      "lokey": midi_pitch_nr-3,
-      "hikey": midi_pitch_nr+3,
-    } 
-    )
-
-from export_sfz import export_sfz
-
-outpath = f"artefacts/instruments/{text}_{timestamp}/"
-
-export_sfz(outpath,regions, args.sample_rate)
-
-#%%
-
-# # for each pitch, transpose it to -3, -2, -1, 0, 1, 2, 3 and add to list 
-# all_notes = []
-# for note in notes:
-#     for pitch in note:
-#         for offset in range(-3,4):
-#             if offset == 0:
-#                 all_notes.append(pitch)
-#             else:  
-#                 pass
-#                 #all_notes.append(torchaudio.transforms.PitchShift(args.sample_rate,offset)(pitch))
-
-# # get timestamp
-# import datetime
-# now = datetime.datetime.now()
-# timestamp = now.strftime("%Y-%m-%d_%H-%M-%S")
-
-# # export all notes
-# out_path  = f"artefacts/instruments/{text}_{timestamp}/"
-# os.makedirs(out_path, exist_ok=True)
-
-# import soundfile as sf
-
-# for i, note in enumerate(all_notes):
-#     sf.write(f"artefacts/instruments/{text}_{timestamp}/{i}.wav", note.T, args.sample_rate)
-
-
-#%%
-
-# %% [markdown]
+ # %% [markdown]
 # # Regenerate your own sounds
 # By adding noise to an audio file and running it through the model to be denoised, new details will be created, pulling the audio closer to the "sonic space" of the model. The more noise you add, the more the sound will change.
 # 
@@ -501,7 +375,7 @@ if not record_audio:
 #@title Generate new sounds from recording
 
 #@markdown Total number of steps (100 is a good start, more steps trades off speed for quality)
-steps = 100#@param {type:"number"}
+steps = 10#@param {type:"number"}
 
 #@markdown How much (0-1) to re-noise the original sample. Adding more noise (a higher number) means a bigger change to the input audio
 noise_level = 0.3#@param {type:"number"}
@@ -654,14 +528,6 @@ if not skip_for_run_all:
     display(ipd.Audio(gen_sample.cpu(), rate=args.sample_rate))
 else:
   print("Skipping section, uncheck 'skip_for_run_all' to enable") 
-
-# %%
-
-
-# %%
-
-
-# %%
 
 
 

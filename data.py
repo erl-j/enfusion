@@ -9,6 +9,7 @@ import numpy as np
 class EnfusionDataset(torch.utils.data.Dataset):
     def __init__(self,path):
         self.data = torch.load(path)
+        
 
     def __len__(self):
         return len(self.data)
@@ -24,7 +25,9 @@ class EnfusionDataset(torch.utils.data.Dataset):
         return {"audio_embedding":audio_embedding, "text_embedding":text_embedding}
 
 class ALVDataset(EnfusionDataset):
-    def __init__(self,dataset_path=None,preprocessed_path=None, filter_out_sequences=False) -> None:
+    def __init__(self,dataset_path=None,preprocessed_path=None, filter_out_sequences=False, min_note=6,max_note=6) -> None:
+        self.min_note = min_note
+        self.max_note = max_note
         if preprocessed_path is not None:
             super().__init__(preprocessed_path)
         else:
@@ -101,10 +104,9 @@ class ALVDataset(EnfusionDataset):
     def __getitem__(self, index):
         # audio_index = 6#np.random.randint(0, len(self.data[index]["audio_embeddings"]))
         # audio_embedding = self.data[index]["audio_embeddings"][audio_index]
-        min_note = 2
-        max_note = 10
-        n_pitches = max_note - min_note + 1
-        audio_embedding = torch.concat(self.data[index]["audio_embeddings"][min_note:max_note+1], dim=-1)
+        # 2, 10
+        n_pitches = self.max_note - self.min_note + 1
+        audio_embedding = torch.concat(self.data[index]["audio_embeddings"][self.min_note:self.max_note+1], dim=-1)
 
         text_index = np.random.randint(0, len(self.data[index]["text_embeddings"]))
         text_embedding =  self.data[index]["text_embeddings"][text_index]
