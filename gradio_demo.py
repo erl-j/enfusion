@@ -1,13 +1,13 @@
 # %%
 import gc
+import os
 from contextlib import contextmanager
 from copy import deepcopy
 from datetime import datetime
 from glob import glob
 from pathlib import Path
-import os
+
 import einops
-import IPython.display as ipd
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -25,10 +25,7 @@ from text_embedder import TextEmbedder
 
 device ="cuda" if torch.cuda.is_available() else "cpu"
 
-import IPython.display as ipd
-import matplotlib.pyplot as plt
 import gradio as gr
-
 
 #@title Args
 sample_size = 65536 
