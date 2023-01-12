@@ -8,6 +8,8 @@ if False:
 
 # %%
 import os
+import noisereduce as nr
+from scipy.io import wavfile
 # GPU 1
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
@@ -188,28 +190,30 @@ steps = 300 #@param {type:"number"}
 #@markdown Check the box below to skip this section when running all cells
 skip_for_run_all = False #@param {type: "boolean"}
 
-text="Hard bass"
+text="short kick"
 text_embedding = text_embedder.embed_text(text).to(device)[None,:].repeat(batch_size,1)
 encodec_processor = EncodecProcessor(48000).to(device)
 
-if not skip_for_run_all:
-  torch.cuda.empty_cache()
-  gc.collect()
-  notes = 48 
-  noise = torch.randn([batch_size, ENCODEC_CHANELS, ENCODEC_FRAME_RATE * model_metadata["clip_s"]* model_metadata["n_pitches"] ]).to(device)
-  generated = sample(model_fn, noise, text_embedding, steps, sampler_type)
-  generated = sonify(generated)
-  generated = generated.cpu().detach()
-  generated_all = generated.clamp(-1, 1)
-  plot_and_hear(generated_all, args.sample_rate)
-else:
-  print("Skipping section, uncheck 'skip_for_run_all' to enable")
+torch.cuda.empty_cache()
+gc.collect()
+notes = 48 
+noise = torch.randn([batch_size, ENCODEC_CHANELS, ENCODEC_FRAME_RATE * model_metadata["clip_s"]* model_metadata["n_pitches"] ]).to(device)
+generated = sample(model_fn, noise, text_embedding, steps, sampler_type)
+generated = sonify(generated)
+generated = generated.cpu().detach()
+#%%
+audio = generated.clamp(-1, 1)
+audio = torchaudio.functional.highpass_biquad(audio,args.sample_rate,15.0,Q=0.707)
+audio_memap = nr.reduce_noise(y=audio.cpu().numpy()[0], sr=args.sample_rate, prop_decrease=0.5)
+wavfile.write("artefacts/noise_reduced.wav", args.sample_rate, audio_memap)
+audio,sr= torchaudio.load("artefacts/noise_reduced.wav")
+# convert to numpy array
+plot_and_hear(audio, args.sample_rate)
 
+#%%
 EXPORT_SOUNDFONT = False
 if EXPORT_SOUNDFONT:
   audio = generated_all
-
-  audio = torchaudio.functional.highpass_biquad(audio,args.sample_rate,15.0,Q=0.707)
 
   plot_and_hear(audio, args.sample_rate)
 

@@ -118,7 +118,7 @@ class DiffusionUncond(pl.LightningModule):
         #     depth=DEPTH,
         #     c_mults=C_MULTS,
         # )
-        self.diffusion = RecurrentScore(n_in_channels=global_args.n_audio_embedding_channels,n_conditioning_channels=global_args.n_conditioning_channels)
+        self.diffusion = RecurrentScore(n_in_channels=global_args.n_audio_embedding_channels,n_conditioning_channels=global_args.n_conditioning_channels, hidden_size=global_args.model_hidden_size, reduced_text_embedding_size=global_args.model_reduced_text_embedding_size)
         #self.diffusion =  MultiPitchRecurrentScore(n_in_channels=global_args.n_audio_embedding_channels,n_conditioning_channels=global_args.n_conditioning_channels, n_pitches=global_args.n_pitches)
         self.diffusion_ema = deepcopy(self.diffusion)
         self.rng = torch.quasirandom.SobolEngine(

@@ -32,14 +32,14 @@ class FourierFeatures(nn.Module):
         return torch.cat([f.cos(), f.sin()], dim=-1)
 
 class RecurrentScore(torch.nn.Module):
-    def __init__(self,n_in_channels,n_conditioning_channels) -> None:
+    def __init__(self,n_in_channels,n_conditioning_channels,hidden_size=256, reduced_text_embedding_size=16) -> None:
         super().__init__()
 
         self.timestep_embed = FourierFeatures(1, 16)
 
-        self.hidden_size = 256
+        self.hidden_size = hidden_size
 
-        self.reduced_text_embedding_size=16
+        self.reduced_text_embedding_size=reduced_text_embedding_size
 
         self.text_reducer = TextReducer(n_conditioning_channels, self.reduced_text_embedding_size)
 
