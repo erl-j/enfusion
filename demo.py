@@ -106,16 +106,19 @@ text_embedder = TextEmbedder()
 #%%
 models_metadata = {
   "multipitch_parallel": {"checkpoint_path":"demo_assets/multiplenotes/parallel/epoch=4210-step=400000.ckpt", "clip_s":5, "n_pitches":9},
-  "multipitch_sequential": {"checkpoint_path":"demo_assets/multiplenotes/sequential/epoch=2105-step=200000.ckpt", "clip_s":5, "n_pitches":9},
-  "single_pitch": {"checkpoint_path":"demo_assets/single_note/epoch=6363-step=70000.ckpt", "clip_s":5, "n_pitches":1},
+  "multipitch_sequential": {"checkpoint_path":"demo_assets/multiplenotes/sequential/epoch=2105-step=200000.ckpt", "clip_s":5, "n_pitches":9,"hidden_size":256,"reduced_text_embedding_size":16},
+  "single_pitch": {"checkpoint_path":"demo_assets/single_note/epoch=6363-step=70000.ckpt", "clip_s":5, "n_pitches":1,"hidden_size":256, "reduced_text_embedding_size":16},
+  "single_pitch_large":{"checkpoint_path":"demo_assets/single_note_large/epoch=4999-step=110000.ckpt", "clip_s":5, "n_pitches":1, "hidden_size":512, "reduced_text_embedding_size":32},
 }
 
-MODEL = "single_pitch"
+MODEL = "single_pitch_large"
+
+model_metadata = models_metadata[MODEL]
 
 if MODEL == "multipitch_parallel":
     denoising_model= MultiPitchRecurrentScore(n_in_channels=128,n_conditioning_channels=512, n_pitches=models_metadata[MODEL]["n_pitches"])
 else:
-    denoising_model= RecurrentScore(n_in_channels=128,n_conditioning_channels=512)
+    denoising_model= RecurrentScore(n_in_channels=128,n_conditioning_channels=512,hidden_size=model_metadata["hidden_size"],reduced_text_embedding_size=model_metadata["reduced_text_embedding_size"])
 
 #@title Model code
 class DiffusionModel(nn.Module):
@@ -125,7 +128,6 @@ class DiffusionModel(nn.Module):
         self.diffusion_ema = deepcopy(self.diffusion)
         self.rng = torch.quasirandom.SobolEngine(1, scramble=True)
 
-model_metadata = models_metadata[MODEL]
 
 print(torch.load(model_metadata["checkpoint_path"],map_location=torch.device(device)))
 
@@ -186,11 +188,11 @@ def sonify(fakes):
 #@markdown How many audio clips to create
 batch_size =  20#@param {type:"number"}
 #@markdown Number of steps (100 is a good start, more steps trades off speed for quality)
-steps = 300 #@param {type:"number"}
+steps = 100 #@param {type:"number"}
 #@markdown Check the box below to skip this section when running all cells
 skip_for_run_all = False #@param {type: "boolean"}
 
-text="short kick"
+text="acoustic piano"
 text_embedding = text_embedder.embed_text(text).to(device)[None,:].repeat(batch_size,1)
 encodec_processor = EncodecProcessor(48000).to(device)
 
@@ -201,12 +203,12 @@ noise = torch.randn([batch_size, ENCODEC_CHANELS, ENCODEC_FRAME_RATE * model_met
 generated = sample(model_fn, noise, text_embedding, steps, sampler_type)
 generated = sonify(generated)
 generated = generated.cpu().detach()
-#%%
+
 audio = generated.clamp(-1, 1)
 audio = torchaudio.functional.highpass_biquad(audio,args.sample_rate,15.0,Q=0.707)
-audio_memap = nr.reduce_noise(y=audio.cpu().numpy()[0], sr=args.sample_rate, prop_decrease=0.5)
-wavfile.write("artefacts/noise_reduced.wav", args.sample_rate, audio_memap)
-audio,sr= torchaudio.load("artefacts/noise_reduced.wav")
+# audio_memap = nr.reduce_noise(y=audio.cpu().numpy()[0], sr=args.sample_rate, prop_decrease=0.5)
+# wavfile.write("artefacts/noise_reduced.wav", args.sample_rate, audio_memap)
+# audio,sr= torchaudio.load("artefacts/noise_reduced.wav")
 # convert to numpy array
 plot_and_hear(audio, args.sample_rate)
 
