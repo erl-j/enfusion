@@ -113,6 +113,26 @@ class ALVDataset(EnfusionDataset):
         return {"audio_embedding":audio_embedding, "text_embedding":text_embedding, "n_pitches":n_pitches}
     
     
+import glob
+from text_embedder import TextEmbedder
+text_embedder = TextEmbedder()
+
+
+class DrumDataset(EnfusionDataset):
+        
+    def __getitem__(self, index):
+        # audio_index = 6#np.random.randint(0, len(self.data[index]["audio_embeddings"]))
+        # audio_embedding = self.data[index]["audio_embeddings"][audio_index]
+        # 2, 10
+        n_pitches = 1
+        audio_embedding = self.data[index]["encoded_frames_embeddings"]
+
+        text_index = np.random.randint(0, len(self.data[index]["text_embeddings"]))
+        text_embedding =  self.data[index]["text_embeddings"][text_index]
+        return {"audio_embedding":audio_embedding, "text_embedding":text_embedding, "n_pitches":n_pitches}
+    
+
+
 # class KillerBeeDataset():
 
 #     def __init__(self) -> None:
@@ -190,11 +210,6 @@ class ALVDataset(EnfusionDataset):
 
 #         #%%
 
-#         from text_embedder import TextEmbedder
-
-#         text_embedder = TextEmbedder()
-
-
 #         for fp in tqdm(fps):
 #             try:
 #                 wav, sr = torchaudio.load(fp)
@@ -261,6 +276,17 @@ class ALVDataset(EnfusionDataset):
 
 
 #         torch.save(data, "artefacts/kb_data_with_text_embeddings.pt")
+
+#     def __getitem__(self, index):
+#         # audio_index = 6#np.random.randint(0, len(self.data[index]["audio_embeddings"]))
+#         # audio_embedding = self.data[index]["audio_embeddings"][audio_index]
+#         # 2, 10
+#         n_pitches = 1
+#         audio_embedding = self.data[index]["encoded_frames_embeddings"]
+
+#         text_index = np.random.randint(0, len(self.data[index]["text_embeddings"]))
+#         text_embedding =  self.data[index]["text_embeddings"][text_index]
+#         return {"audio_embedding":audio_embedding, "text_embedding":text_embedding, "n_pitches":n_pitches}
 
 
 

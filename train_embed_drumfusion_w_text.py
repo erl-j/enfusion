@@ -32,7 +32,7 @@ from encodec_processor import (
 import pandas as pd
 from misc import multiscale_loss
 from models import RecurrentScore, MultiPitchRecurrentScore
-from data import EnfusionDataset, ALVDataset
+from data import EnfusionDataset, ALVDataset, DrumDataset
 
 # Define the noise schedule and sampling loop
 def get_alphas_sigmas(t):
@@ -298,7 +298,8 @@ def main():
 
     encodec_processor = EncodecProcessor(SAMPLE_RATE)
 
-    train_set = ALVDataset(preprocessed_path=args.dataset_path, filter_out_sequences=True, min_note=6,max_note=6)
+    train_set = DrumDataset("artefacts/kb_data_with_text_embeddings.pt")
+    #train_set = ALVDataset(preprocessed_path=args.dataset_path, filter_out_sequences=True, min_note=6,max_note=6)
     print(f"train_set len: {len(train_set)}")
 
     example = train_set[0]
