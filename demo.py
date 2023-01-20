@@ -192,6 +192,7 @@ steps = 100 #@param {type:"number"}
 #@markdown Check the box below to skip this section when running all cells
 skip_for_run_all = False #@param {type: "boolean"}
 
+
 text="acoustic piano"
 text_embedding = text_embedder.embed_text(text).to(device)[None,:].repeat(batch_size,1)
 encodec_processor = EncodecProcessor(48000).to(device)
