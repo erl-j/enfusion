@@ -125,7 +125,7 @@ class DrumDataset(EnfusionDataset):
         # audio_embedding = self.data[index]["audio_embeddings"][audio_index]
         # 2, 10
         n_pitches = 1
-        audio_embedding = self.data[index]["encoded_frames_embeddings"]
+        audio_embedding = self.data[index]["encoded_frames_embeddings"][0]
 
         text_index = np.random.randint(0, len(self.data[index]["text_embeddings"]))
         text_embedding =  self.data[index]["text_embeddings"][text_index]

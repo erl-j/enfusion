@@ -122,7 +122,6 @@ class DiffusionModel(nn.Module):
         self.rng = torch.quasirandom.SobolEngine(1, scramble=True)
 
 
-print(torch.load(model_metadata["checkpoint_path"],map_location=torch.device(device)))
 
 ENCODEC_FRAME_RATE = 150
 ENCODEC_CHANELS = 128
@@ -131,7 +130,6 @@ print("Creating the model...")
 model = DiffusionModel(args, denoising_model=denoising_model)
 state_dict=torch.load(model_metadata["checkpoint_path"],map_location=torch.device(device))["state_dict"]
 
-print(state_dict.keys())
 model.load_state_dict(state_dict, strict=False)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = model.requires_grad_(False).to(device)
