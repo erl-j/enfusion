@@ -109,6 +109,7 @@ models_metadata = {
   "multipitch_sequential": {"checkpoint_path":"demo_assets/multiplenotes/sequential/epoch=2105-step=200000.ckpt", "clip_s":5, "n_pitches":9,"hidden_size":256,"reduced_text_embedding_size":16},
   "single_pitch": {"checkpoint_path":"demo_assets/single_note/epoch=6363-step=70000.ckpt", "clip_s":5, "n_pitches":1,"hidden_size":256, "reduced_text_embedding_size":16},
   "single_pitch_large":{"checkpoint_path":"demo_assets/single_note_large/epoch=4999-step=110000.ckpt", "clip_s":5, "n_pitches":1, "hidden_size":512, "reduced_text_embedding_size":32},
+  "drums":{"checkpoint_path":"demo_assets/drums/epoch=27058-step=460000.ckpt", "clip_s":1, "n_pitches":1, "hidden_size":512, "reduced_text_embedding_size":32},
 }
 
 MODEL = "single_pitch_large"
