@@ -1,61 +1,41 @@
 # %%
-
 import os
+
 import noisereduce as nr
 from scipy.io import wavfile
+
 # GPU 1
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
+import gc
+import os
 # %%
 import sys
-
-#@title Imports and definitions
-from prefigure.prefigure import get_all_args
-from contextlib import contextmanager
 from copy import deepcopy
-import math
-from pathlib import Path
-#from google.colab import files
-
-import os, signal, sys
-import gc
-
-
-import torch
-from torch import optim, nn
-from torch.nn import functional as F
-from torch.utils import data
-from tqdm import trange
-from einops import rearrange
-import einops
-
-import torchaudio
-from models import RecurrentScore, MultiPitchRecurrentScore
-import numpy as np
-
-import random
-import matplotlib.pyplot as plt
-import IPython.display as ipd
-from audio_diffusion_utils import Stereo, PadCrop
-from glob import glob
-
-from sampling import sample, resample, reverse_sample
-
-from export_sfz import export_sfz
 from datetime import datetime
 
+import einops
+import IPython.display as ipd
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+import torchaudio
+from einops import rearrange
+#@title Imports and definitions
+from torch import nn, optim
+from tqdm import tqdm
 
 from encodec_processor import EncodecProcessor
+from export_sfz import export_sfz
+from models import MultiPitchRecurrentScore, RecurrentScore
+from sampling import resample, reverse_sample, sample
 from text_embedder import TextEmbedder
-
-
 
 device ="cuda" if torch.cuda.is_available() else "cpu"
 
-
-
-import matplotlib.pyplot as plt
 import IPython.display as ipd
+import matplotlib.pyplot as plt
+
 
 def plot_and_hear(audio, sr):
     display(ipd.Audio(audio.cpu().clamp(-1, 1), rate=sr))
@@ -67,7 +47,6 @@ def load_to_device(path, sr):
       audio = torchaudio.transforms.Resample(file_sr, sr)(audio)
     audio = audio.to(device)
     return audio
-
 
 #@title Args
 sample_size = 65536 
@@ -86,22 +65,12 @@ sampler_type = "v-iplms" #@param ["v-iplms", "k-heun", "k-dpmpp_2s_ancestral", "
 
 text_embedder = TextEmbedder()
 
-# %% [markdown]
-# Select the model you want to sample from
-# ---
-# Model name | Description |
-# --- | --- |
-# multipitch_parallel | multi-pitch, parallel
-# multipitch_sequential | multi-pitch, sequential
-# single_pitch | single pitch
-# 
-
-#%%
 models_metadata = {
   "multipitch_parallel": {"checkpoint_path":"demo_assets/multiplenotes/parallel/epoch=4210-step=400000.ckpt", "clip_s":5, "n_pitches":9},
   "multipitch_sequential": {"checkpoint_path":"demo_assets/multiplenotes/sequential/epoch=2105-step=200000.ckpt", "clip_s":5, "n_pitches":9,"hidden_size":256,"reduced_text_embedding_size":16},
   "single_pitch": {"checkpoint_path":"demo_assets/single_note/epoch=6363-step=70000.ckpt", "clip_s":5, "n_pitches":1,"hidden_size":256, "reduced_text_embedding_size":16},
   "single_pitch_large":{"checkpoint_path":"demo_assets/single_note_large/epoch=4999-step=110000.ckpt", "clip_s":5, "n_pitches":1, "hidden_size":512, "reduced_text_embedding_size":32},
+  "drums":{"checkpoint_path":"demo_assets/drums/epoch=27058-step=460000.ckpt", "clip_s":1, "n_pitches":1, "hidden_size":512, "reduced_text_embedding_size":32},
 }
 
 MODEL = "single_pitch_large"
@@ -120,7 +89,6 @@ class DiffusionModel(nn.Module):
         self.diffusion = denoising_model
         self.diffusion_ema = deepcopy(self.diffusion)
         self.rng = torch.quasirandom.SobolEngine(1, scramble=True)
-
 
 
 ENCODEC_FRAME_RATE = 150
