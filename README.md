@@ -1,3 +1,4 @@
+Audio latent diffusion with encodec latents
 ---
 title: "enfusion"
 emoji: "🍵"
